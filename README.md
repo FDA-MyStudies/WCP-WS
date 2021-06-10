@@ -1,5 +1,5 @@
 # My Studies WCP Webservices(WCP-WS)
-The WCP-WS provides  webservices for the mobile apps and the response server.
+The WCP-WS provides  webservices for the mobile apps and the response server..
 
 The WCP-WS application is built on Java.
 
