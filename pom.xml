@@ -8,6 +8,12 @@
 	<name>StudyMetaData</name>
 	<description>HPHCI My Studies Web Services</description>
 	<url>https://github.com/FDA-MyStudies/WCP-WS</url>
+	<scm>
+		<connection>scm:git:https://github.com/FDA-MyStudies/WCP-WS</connection>
+		<developerConnection>scm:git:https://github.com/FDA-MyStudies/WCP-WS</developerConnection>
+		<url>https://github.com/FDA-MyStudies</url>
+		<tag>HEAD</tag>
+	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
