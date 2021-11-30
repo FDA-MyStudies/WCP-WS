@@ -77,7 +77,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-//import java.util.Base64;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -4026,7 +4026,7 @@ public class ActivityMetaDataDao {
         imageBytes = IOUtils.toByteArray(new URL(imagePath));
       }
 
-//      base64Image = Base64.getEncoder().encodeToString(imageBytes);
+      base64Image = Base64.getEncoder().encodeToString(imageBytes);
     } catch (Exception e) {
       LOGGER.error("ActivityMetaDataDao - getBase64Image() :: ERROR", e);
     }
