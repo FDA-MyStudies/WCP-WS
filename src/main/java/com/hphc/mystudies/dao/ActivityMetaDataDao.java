@@ -3380,11 +3380,6 @@ public class ActivityMetaDataDao {
           (reponseType == null || StringUtils.isEmpty(reponseType.getStyle()))
               ? StudyMetaDataConstants.QUESTION_NUMERIC_STYLE_INTEGER
               : reponseType.getStyle());
-      questionFormat.put(
-          "unit",
-          (reponseType == null || StringUtils.isEmpty(reponseType.getUnit()))
-              ? ""
-              : reponseType.getUnit());
       if (questionFormat
           .get("style")
           .toString()
@@ -3419,12 +3414,22 @@ public class ActivityMetaDataDao {
             (StringUtils.isEmpty(questionLangBO.getPlaceholderText()))
                 ? ""
                 : questionLangBO.getPlaceholderText());
+        questionFormat.put(
+            "unit",
+            (reponseType == null || StringUtils.isEmpty(questionLangBO.getUnit()))
+                ? ""
+                : questionLangBO.getUnit());
       } else {
         questionFormat.put(
             "placeholder",
             (reponseType == null || StringUtils.isEmpty(reponseType.getPlaceholder()))
                 ? ""
                 : reponseType.getPlaceholder());
+        questionFormat.put(
+            "unit",
+            (reponseType == null || StringUtils.isEmpty(reponseType.getUnit()))
+                ? ""
+                : reponseType.getUnit());
       }
     } catch (Exception e) {
       LOGGER.error("ActivityMetaDataDao - formatQuestionNumericDetails() :: ERROR", e);
