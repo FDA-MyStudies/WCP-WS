@@ -64,7 +64,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -77,7 +78,7 @@ import org.json.JSONObject;
 @Path("/")
 public class StudyMetaDataService {
 
-  private static final Logger LOGGER = Logger.getLogger(StudyMetaDataService.class);
+  private static final Logger LOGGER = LogManager.getLogger(StudyMetaDataService.class);
 
   @SuppressWarnings("unchecked")
   HashMap<String, String> propMap = StudyMetaDataUtil.getAppProperties();

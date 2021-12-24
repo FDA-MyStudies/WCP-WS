@@ -34,7 +34,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Implements {@link Filter} interface to filter the incoming requests.
@@ -44,7 +45,7 @@ import org.apache.log4j.Logger;
  */
 public class RestAuthenticationFilter implements Filter {
 
-  public static final Logger LOGGER = Logger.getLogger(RestAuthenticationFilter.class);
+  public static final Logger LOGGER = LogManager.getLogger(RestAuthenticationFilter.class);
   public static final String AUTHENTICATION_HEADER = "Authorization";
 
   @Override

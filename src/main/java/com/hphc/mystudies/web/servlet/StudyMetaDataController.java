@@ -31,7 +31,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Extends abstract class {@link HttpServlet} to provide servlet for a Web site
@@ -41,7 +42,7 @@ import org.apache.log4j.Logger;
  */
 public class StudyMetaDataController extends HttpServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(StudyMetaDataController.class);
+  private static final Logger LOGGER = LogManager.getLogger(StudyMetaDataController.class);
   private static final long serialVersionUID = 1L;
   private String port = "";
   private String forwardURL = "";

@@ -29,7 +29,8 @@ import com.hphc.mystudies.dao.ActivityMetaDataDao;
 import com.hphc.mystudies.exception.OrchestrationException;
 import com.hphc.mystudies.util.StudyMetaDataUtil;
 import java.util.HashMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Activity metadata service that communicates with activity metadata {@link ActivityMetaDataDao}
@@ -39,7 +40,7 @@ import org.apache.log4j.Logger;
  */
 public class ActivityMetaDataOrchestration {
 
-  private static final Logger LOGGER = Logger.getLogger(ActivityMetaDataOrchestration.class);
+  private static final Logger LOGGER = LogManager.getLogger(ActivityMetaDataOrchestration.class);
 
   @SuppressWarnings("unchecked")
   HashMap<String, String> propMap = StudyMetaDataUtil.getAppProperties();

@@ -40,7 +40,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Study metadata service that communicates with study metadata {@link StudyMetaDataDao} repository.
@@ -49,7 +50,7 @@ import org.apache.log4j.Logger;
  */
 public class StudyMetaDataOrchestration {
 
-  private static final Logger LOGGER = Logger.getLogger(StudyMetaDataOrchestration.class);
+  private static final Logger LOGGER = LogManager.getLogger(StudyMetaDataOrchestration.class);
 
   @SuppressWarnings("unchecked")
   HashMap<String, String> propMap = StudyMetaDataUtil.getAppProperties();

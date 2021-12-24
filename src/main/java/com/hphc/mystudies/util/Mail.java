@@ -31,7 +31,8 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Provides mail configuration details to send mail.
@@ -40,7 +41,7 @@ import org.apache.log4j.Logger;
  */
 public class Mail {
 
-  private static final Logger LOGGER = Logger.getLogger(Mail.class.getName());
+  private static final Logger LOGGER = LogManager.getLogger(Mail.class.getName());
 
   @SuppressWarnings("unchecked")
   static HashMap<String, String> propMap = StudyMetaDataUtil.configMap;
