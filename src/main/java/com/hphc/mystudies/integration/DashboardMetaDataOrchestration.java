@@ -27,7 +27,8 @@ import com.hphc.mystudies.dao.DashboardMetaDataDao;
 import com.hphc.mystudies.exception.OrchestrationException;
 import com.hphc.mystudies.util.StudyMetaDataUtil;
 import java.util.HashMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Dashboard metadata service that communicates with dashboard metadata {@link DashboardMetaDataDao}
@@ -37,7 +38,7 @@ import org.apache.log4j.Logger;
  */
 public class DashboardMetaDataOrchestration {
 
-  private static final Logger LOGGER = Logger.getLogger(DashboardMetaDataOrchestration.class);
+  private static final Logger LOGGER = LogManager.getLogger(DashboardMetaDataOrchestration.class);
 
   @SuppressWarnings("unchecked")
   HashMap<String, String> propMap = StudyMetaDataUtil.getAppProperties();

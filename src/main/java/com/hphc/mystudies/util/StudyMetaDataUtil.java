@@ -45,7 +45,8 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Provides static methods.
@@ -54,7 +55,7 @@ import org.apache.log4j.Logger;
  */
 public class StudyMetaDataUtil {
 
-  private static final Logger LOGGER = Logger.getLogger(StudyMetaDataUtil.class.getName());
+  private static final Logger LOGGER = LogManager.getLogger(StudyMetaDataUtil.class.getName());
 
   @SuppressWarnings("rawtypes")
   protected static final HashMap configMap = StudyMetaDataUtil.getAppProperties();

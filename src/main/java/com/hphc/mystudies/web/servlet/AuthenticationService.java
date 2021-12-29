@@ -27,7 +27,8 @@ import com.sun.jersey.core.util.Base64;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Provides authentication to check requesting user is authorized to access data.
@@ -36,7 +37,7 @@ import org.apache.log4j.Logger;
  */
 public class AuthenticationService {
 
-  public static final Logger LOGGER = Logger.getLogger(AuthenticationService.class);
+  public static final Logger LOGGER = LogManager.getLogger(AuthenticationService.class);
 
   @SuppressWarnings("unchecked")
   HashMap<String, String> authPropMap = StudyMetaDataUtil.getAuthorizationProperties();

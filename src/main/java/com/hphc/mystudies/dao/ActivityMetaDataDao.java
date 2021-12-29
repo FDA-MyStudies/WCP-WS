@@ -90,7 +90,8 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -104,7 +105,7 @@ import org.hibernate.Transaction;
  */
 public class ActivityMetaDataDao {
 
-  private static final Logger LOGGER = Logger.getLogger(ActivityMetaDataDao.class);
+  private static final Logger LOGGER = LogManager.getLogger(ActivityMetaDataDao.class);
 
   @SuppressWarnings("unchecked")
   HashMap<String, String> propMap = StudyMetaDataUtil.getAppProperties();

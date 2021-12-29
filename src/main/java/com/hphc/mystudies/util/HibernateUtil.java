@@ -24,7 +24,8 @@ package com.hphc.mystudies.util;
 
 import java.io.FileInputStream;
 import java.util.Properties;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
 
@@ -35,7 +36,7 @@ import org.hibernate.cfg.AnnotationConfiguration;
  */
 public class HibernateUtil {
 
-  private static Logger logger = Logger.getLogger(HibernateUtil.class);
+  private static Logger logger = LogManager.getLogger(HibernateUtil.class);
 
   private static SessionFactory sessionFactory = null;
 
