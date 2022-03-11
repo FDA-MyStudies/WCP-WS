@@ -34,6 +34,7 @@ import java.util.List;
 public class ActivityResponse {
 
   private String message = StudyMetaDataConstants.FAILURE;
+  private String studyName;
   private List<ActivitiesBean> activities = new ArrayList<>();
 
   public String getMessage() {
@@ -50,5 +51,13 @@ public class ActivityResponse {
 
   public void setActivities(List<ActivitiesBean> activities) {
     this.activities = activities;
+  }
+
+  public String getStudyName() {
+    return studyName;
+  }
+
+  public void setStudyName(String studyName) {
+    this.studyName = studyName;
   }
 }
