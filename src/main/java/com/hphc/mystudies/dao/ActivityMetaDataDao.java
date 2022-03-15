@@ -42,31 +42,7 @@ import com.hphc.mystudies.bean.QuestionnaireActivityStepsBean;
 import com.hphc.mystudies.bean.SpatialSpanMemoryFormatBean;
 import com.hphc.mystudies.bean.TowerOfHanoiFormatBean;
 import com.hphc.mystudies.bean.appendix.QuestionnaireActivityStructureBean;
-import com.hphc.mystudies.dto.ActiveTaskAttrtibutesValuesDto;
-import com.hphc.mystudies.dto.ActiveTaskCustomFrequenciesDto;
-import com.hphc.mystudies.dto.ActiveTaskDto;
-import com.hphc.mystudies.dto.ActiveTaskFrequencyDto;
-import com.hphc.mystudies.dto.ActiveTaskLangBO;
-import com.hphc.mystudies.dto.ActiveTaskListDto;
-import com.hphc.mystudies.dto.ActiveTaskMasterAttributeDto;
-import com.hphc.mystudies.dto.AnchorDateTypeDto;
-import com.hphc.mystudies.dto.FormLangBO;
-import com.hphc.mystudies.dto.FormMappingDto;
-import com.hphc.mystudies.dto.InstructionsDto;
-import com.hphc.mystudies.dto.InstructionsLangBO;
-import com.hphc.mystudies.dto.ParticipantPropertiesBO;
-import com.hphc.mystudies.dto.QuestionLangBO;
-import com.hphc.mystudies.dto.QuestionReponseTypeDto;
-import com.hphc.mystudies.dto.QuestionResponseSubTypeDto;
-import com.hphc.mystudies.dto.QuestionResponsetypeMasterInfoDto;
-import com.hphc.mystudies.dto.QuestionnaireLangDto;
-import com.hphc.mystudies.dto.QuestionnairesCustomFrequenciesDto;
-import com.hphc.mystudies.dto.QuestionnairesDto;
-import com.hphc.mystudies.dto.QuestionnairesFrequenciesDto;
-import com.hphc.mystudies.dto.QuestionnairesStepsDto;
-import com.hphc.mystudies.dto.QuestionsDto;
-import com.hphc.mystudies.dto.StudyDto;
-import com.hphc.mystudies.dto.StudyVersionDto;
+import com.hphc.mystudies.dto.*;
 import com.hphc.mystudies.exception.DAOException;
 import com.hphc.mystudies.util.HibernateUtil;
 import com.hphc.mystudies.util.MultiLanguageConstants;
@@ -388,6 +364,20 @@ public class ActivityMetaDataDao {
           }
         }
 
+        if (StringUtils.isNotBlank(language)
+                && !StringUtils.equals(language, MultiLanguageConstants.ENGLISH)
+                && studyDto.getMultiLanguageFlag() != null
+                && studyDto.getMultiLanguageFlag()
+                && studyDto.getSelectedLanguages().contains(language)) {
+          StudyLanguageBO studyLanguageBO = (StudyLanguageBO) session.createQuery("from StudyLanguageBO sl where sl.studyLanguagePK.study_id = :id")
+                  .setInteger("id", studyDto.getId())
+                  .uniqueResult();
+          if (studyLanguageBO != null) {
+            activityResponse.setStudyName(studyLanguageBO.getName());
+          }
+        } else {
+          activityResponse.setStudyName(studyDto.getName());
+        }
         activityResponse.setActivities(activitiesBeanList);
         activityResponse.setMessage(StudyMetaDataConstants.SUCCESS);
       } else {
