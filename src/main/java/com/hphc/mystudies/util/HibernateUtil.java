@@ -27,7 +27,7 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.AnnotationConfiguration;
+import org.hibernate.cfg.Configuration;
 
 /**
  * Provides hibernate configuration details to get session factory.
@@ -55,11 +55,7 @@ public class HibernateUtil {
             new FileInputStream(
                 ServletContextHolder.getServletContext()
                     .getInitParameter("property_file_location_path")));
-        sessionFactory =
-            new AnnotationConfiguration()
-                .addProperties(properties)
-                .configure("hibernate.cfg.xml")
-                .buildSessionFactory();
+        sessionFactory = new Configuration().addProperties(properties).configure().buildSessionFactory();
       }
     } catch (Exception e) {
       logger.error("HibernateUtil - getSessionFactory() :: ERROR ", e);
