@@ -136,5 +136,7 @@
       class="com.hphc.mystudies.dto.QuestionnaireLangDto"/>
     <mapping
       class="com.hphc.mystudies.dto.QuestionnaireLangPK"/>
+    <mapping
+            class="com.hphc.mystudies.dto.VersionInfoDTO"/>
   </session-factory>
 </hibernate-configuration>

@@ -379,4 +379,21 @@ public class AppMetaDataOrchestration {
     LOGGER.info("INFO: AppMetaDataOrchestration - storeResponseActivitiesTemp() :: ends");
     return errorResponse;
   }
+
+  public String updateAppVersionDetails(
+          String appId,
+          String appName,
+          String appVersion,
+          String osType) {
+    LOGGER.info("INFO: AppMetaDataOrchestration - updateAppVersionDetails() :: Starts");
+    String updateAppVersionResponse = "OOPS! Something went wrong.";
+    try {
+      updateAppVersionResponse =
+              appMetaDataDao.updateAppVersionDetails(appId, appName, osType, appVersion);
+    } catch (Exception e) {
+      LOGGER.error("AppMetaDataOrchestration - updateAppVersionDetails() :: ERROR", e);
+    }
+    LOGGER.info("INFO: AppMetaDataOrchestration - updateAppVersionDetails() :: Ends");
+    return updateAppVersionResponse;
+  }
 }

@@ -1502,4 +1502,67 @@ public class StudyMetaDataService {
     LOGGER.info("INFO: StudyMetaDataService - getParticipantProperties() :: ends");
     return participantPropertiesResponseBean;
   }
+
+  /**
+   * Update app version
+   *
+   * @param params body parameters
+   * @param context
+   * @param response
+   * @return Object
+   * @author BTC
+   */
+  @POST
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Path("updateVersionInfo")
+  public Object updateAppVersionInfo(
+          String params, @Context ServletContext context, @Context HttpServletResponse response) {
+    LOGGER.info("INFO: StudyMetaDataService - updateAppVersionInfo() :: Starts");
+    String updateAppVersionResponse = "OOPS! Something went wrong.";
+    try {
+      JSONObject serviceJson = new JSONObject(params);
+      String appId = serviceJson.getString("appId");
+      String appName = serviceJson.getString("appName");
+      String appVersion = serviceJson.getString("appVersion");
+      String osType = serviceJson.getString(StudyMetaDataEnum.QF_OS_TYPE.value());
+      if (StringUtils.isNotEmpty(appId)
+              && StringUtils.isNotEmpty(appName)
+              && StringUtils.isNotEmpty(appVersion)
+              && StringUtils.isNotEmpty(osType)) {
+        if (!osType.equals(StudyMetaDataConstants.STUDY_PLATFORM_IOS)
+                && !osType.equals(StudyMetaDataConstants.STUDY_PLATFORM_ANDROID)) {
+          StudyMetaDataUtil.getFailureResponse(
+                  ErrorCodes.STATUS_102,
+                  ErrorCodes.UNKNOWN,
+                  StudyMetaDataConstants.INVALID_INPUT_ERROR_MSG,
+                  response);
+          return Response.status(Response.Status.BAD_REQUEST)
+                  .entity(StudyMetaDataConstants.INVALID_INPUT)
+                  .build();
+        }
+
+        updateAppVersionResponse =
+                appMetaDataOrchestration.updateAppVersionDetails(appId, appName, appVersion, osType);
+      } else {
+        StudyMetaDataUtil.getFailureResponse(
+                ErrorCodes.STATUS_102,
+                ErrorCodes.UNKNOWN,
+                StudyMetaDataConstants.INVALID_INPUT_ERROR_MSG,
+                response);
+        return Response.status(Response.Status.BAD_REQUEST)
+                .entity(StudyMetaDataConstants.INVALID_INPUT)
+                .build();
+      }
+    } catch (Exception e) {
+      LOGGER.error("StudyMetaDataService - updateAppVersionInfo() :: ERROR", e);
+      StudyMetaDataUtil.getFailureResponse(
+              ErrorCodes.STATUS_104, ErrorCodes.UNKNOWN, StudyMetaDataConstants.FAILURE, response);
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+              .entity(StudyMetaDataConstants.FAILURE)
+              .build();
+    }
+    LOGGER.info("INFO: StudyMetaDataService - updateAppVersionInfo() :: Ends");
+    return updateAppVersionResponse;
+  }
 }
