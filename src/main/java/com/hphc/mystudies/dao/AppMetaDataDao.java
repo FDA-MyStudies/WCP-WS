@@ -28,14 +28,7 @@ import com.hphc.mystudies.bean.NotificationsResponse;
 import com.hphc.mystudies.bean.StudyUpdatesBean;
 import com.hphc.mystudies.bean.StudyUpdatesResponse;
 import com.hphc.mystudies.bean.TermsPolicyResponse;
-import com.hphc.mystudies.dto.AppVersionDto;
-import com.hphc.mystudies.dto.AppVersionInfo;
-import com.hphc.mystudies.dto.NotificationDto;
-import com.hphc.mystudies.dto.NotificationLangBO;
-import com.hphc.mystudies.dto.ResourcesDto;
-import com.hphc.mystudies.dto.ResourcesLangBO;
-import com.hphc.mystudies.dto.StudyDto;
-import com.hphc.mystudies.dto.StudyVersionDto;
+import com.hphc.mystudies.dto.*;
 import com.hphc.mystudies.exception.DAOException;
 import com.hphc.mystudies.util.HibernateUtil;
 import com.hphc.mystudies.util.MultiLanguageConstants;
@@ -717,5 +710,71 @@ public class AppMetaDataDao {
     }
     LOGGER.info("NotificationDAOImpl - getNotificationLang - Ends");
     return notificationBO;
+  }
+
+  /**
+   * Updates App Version
+   *
+   * @param appId
+   * @param appName
+   * @param appVersion
+   * @param osType
+   * @return
+   * @throws DAOException
+   * @author BTC
+   */
+  @SuppressWarnings("unchecked")
+  public String updateAppVersionDetails(
+          String appId,
+          String appName,
+          String osType,
+          String appVersion)
+          throws DAOException {
+    LOGGER.info("INFO: AppMetaDataDao - updateAppVersionDetails() :: Starts");
+    Session session = null;
+    Transaction transaction = null;
+    String updateAppVersionResponse = "OOPS! Something went wrong.";
+    try {
+      session = sessionFactory.openSession();
+      VersionInfoDTO versionInfoDTO = null;
+      List<VersionInfoDTO> versionInfoList = session
+                      .createQuery("FROM VersionInfoDTO where appId= :appId")
+                      .setParameter("appId", appId)
+                      .list();
+      if (versionInfoList != null && !versionInfoList.isEmpty()) {
+        if (versionInfoList.size() == 1) {
+          versionInfoDTO = versionInfoList.get(0);
+        } else {
+          throw new Exception("Multiple records found for App : " + appName);
+        }
+      } else {
+        versionInfoDTO = new VersionInfoDTO();
+      }
+
+      transaction = session.beginTransaction();
+      versionInfoDTO.setAppId(appId);
+      versionInfoDTO.setAppName(appName);
+      if (StudyMetaDataConstants.STUDY_PLATFORM_ANDROID.equals(osType)) {
+        versionInfoDTO.setAndroidVersion(appVersion);
+      } else if (StudyMetaDataConstants.STUDY_PLATFORM_IOS.equals(osType)) {
+        versionInfoDTO.setIosVersion(appVersion);
+      }
+      session.saveOrUpdate(versionInfoDTO);
+      transaction.commit();
+      updateAppVersionResponse =
+                "App Version was successfully updated to v" + appVersion + " for " + osType + ".";
+
+    } catch (Exception e) {
+      LOGGER.error("AppMetaDataDao - updateAppVersionDetails() :: ERROR", e);
+      if (transaction != null) {
+        transaction.rollback();
+      }
+    } finally {
+      if (session != null) {
+        session.close();
+      }
+    }
+    LOGGER.info("INFO: AppMetaDataDao - updateAppVersionDetails() :: Ends");
+    return updateAppVersionResponse;
   }
 }
