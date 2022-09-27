@@ -2,8 +2,8 @@ package com.hphc.mystudies.bean;
 
 public class PipingBean {
 
-    private String pipingSnippet;
-    private String sourceQuestionKey;
+    private String pipingSnippet = "";
+    private String sourceQuestionKey = "";
 
     public String getPipingSnippet() {
         return pipingSnippet;

@@ -2370,7 +2370,8 @@ public class ActivityMetaDataDao {
           preLoadLogicBean.setValue(value.toString());
           preLoadLogicBean.setOperator(operator.toString());
           questionBean.setPreLoadLogic(preLoadLogicBean);
-//        Todo after piping functionality  questionBean.setPiping(new PipingBean());
+          questionBean.setPipingLogic(new PipingBean());
+//        Todo after piping functionality
 
           stepsSequenceTreeMap.put(
                   sequenceNoMap.get(
@@ -2615,6 +2616,7 @@ public class ActivityMetaDataDao {
           preLoadLogicBean.setValue(value.toString());
           preLoadLogicBean.setOperator(operator.toString());
           formBean.setPreLoadLogic(preLoadLogicBean);
+          formBean.setPipingLogic(new PipingBean());
 //        Todo after piping functionality  questionBean.setPiping(new PipingBean());
 
           stepsSequenceTreeMap.put(

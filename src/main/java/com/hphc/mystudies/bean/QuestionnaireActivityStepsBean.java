@@ -42,8 +42,8 @@ public class QuestionnaireActivityStepsBean {
   private String text = "";
   private Boolean skippable = false;
   private Boolean isHidden = false;
-  private String groupId;
-  private String sourceQuestionKey;
+  private String groupId = "";
+  private String sourceQuestionKey = "";
   private String groupName = "";
   private Boolean repeatable = false;
   private String repeatableText = "";
@@ -54,8 +54,8 @@ public class QuestionnaireActivityStepsBean {
   private String[] options = new String[0];
   private Boolean defaultVisibility = false;
   private Boolean isPiping = false;
-  private PreLoadLogicBean preLoadLogic;
-  private PipingBean pipingLogic;
+  private PreLoadLogicBean preLoadLogic = new PreLoadLogicBean();
+  private PipingBean pipingLogic = new PipingBean();
 
   public String getType() {
     return type;

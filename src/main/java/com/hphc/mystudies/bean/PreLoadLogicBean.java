@@ -2,11 +2,11 @@ package com.hphc.mystudies.bean;
 
 public class PreLoadLogicBean {
 
-    private String value;
-    private String operator;
-    private String activityId;
-    private String activityVersion;
-    private String destinationStepKey;
+    private String value = "";
+    private String operator = "";
+    private String activityId = "";
+    private String activityVersion = "";
+    private String destinationStepKey = "";
 
     public String getValue() {
         return value;
