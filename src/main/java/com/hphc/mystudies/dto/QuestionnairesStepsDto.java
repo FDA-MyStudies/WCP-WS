@@ -96,6 +96,21 @@ public class QuestionnairesStepsDto implements Serializable {
   @Column(name = "active")
   private Boolean active;
 
+  @Column(name = "default_visibility")
+  private Boolean defaultVisibility;
+
+  @Column(name = "destination_true_as_group")
+  private Integer destinationTrueAsGroup;
+
+  @Column(name = "is_piping")
+  private Integer isPiping;
+
+  @Column(name = "piping_snippet")
+  private String pipingSnippet;
+
+  @Column(name = "piping_source_question_key")
+  private String pipingSourceQuestionKey;
+
   @Transient private String destinationStepType;
 
   public Integer getStepId() {
@@ -240,5 +255,45 @@ public class QuestionnairesStepsDto implements Serializable {
 
   public void setDestinationStepType(String destinationStepType) {
     this.destinationStepType = destinationStepType;
+  }
+
+  public Boolean getDefaultVisibility() {
+    return defaultVisibility;
+  }
+
+  public void setDefaultVisibility(Boolean defaultVisibility) {
+    this.defaultVisibility = defaultVisibility;
+  }
+
+  public Integer getDestinationTrueAsGroup() {
+    return destinationTrueAsGroup;
+  }
+
+  public void setDestinationTrueAsGroup(Integer destinationTrueAsGroup) {
+    this.destinationTrueAsGroup = destinationTrueAsGroup;
+  }
+
+  public Integer getIsPiping() {
+    return isPiping;
+  }
+
+  public void setIsPiping(Integer isPiping) {
+    this.isPiping = isPiping;
+  }
+
+  public String getPipingSnippet() {
+    return pipingSnippet;
+  }
+
+  public void setPipingSnippet(String pipingSnippet) {
+    this.pipingSnippet = pipingSnippet;
+  }
+
+  public String getPipingSourceQuestionKey() {
+    return pipingSourceQuestionKey;
+  }
+
+  public void setPipingSourceQuestionKey(String pipingSourceQuestionKey) {
+    this.pipingSourceQuestionKey = pipingSourceQuestionKey;
   }
 }
