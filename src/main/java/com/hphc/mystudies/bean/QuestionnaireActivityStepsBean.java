@@ -52,7 +52,7 @@ public class QuestionnaireActivityStepsBean {
   private Map<String, Object> format = new HashMap<>();
   private List<QuestionnaireActivityStepsBean> steps = new ArrayList<>();
   private String[] options = new String[0];
-  private Boolean defaultVisibility = false;
+  private Boolean defaultVisibility = true;
   private Boolean isPiping = false;
   private PreLoadLogicBean preLoadLogic = new PreLoadLogicBean();
   private PipingBean pipingLogic = new PipingBean();
