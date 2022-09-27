@@ -55,7 +55,7 @@ public class QuestionnaireActivityStepsBean {
   private Boolean defaultVisibility = false;
   private Boolean isPiping = false;
   private PreLoadLogicBean preLoadLogic;
-  private PipingBean piping;
+  private PipingBean pipingLogic;
 
   public String getType() {
     return type;
@@ -229,11 +229,11 @@ public class QuestionnaireActivityStepsBean {
     }
   }
 
-  public PipingBean getPipingBean() {
-    return piping;
+  public PipingBean getPipingLogic() {
+    return pipingLogic;
   }
 
-  public void setPiping(PipingBean piping) {
-    this.piping = piping;
+  public void setPipingLogic(PipingBean pipingLogic) {
+    this.pipingLogic = pipingLogic;
   }
 }
