@@ -4,13 +4,19 @@ public class PipingBean {
 
     private String pipingSnippet = "";
     private String sourceQuestionKey = "";
+    private String activityId = "";
+    private String activityVersion = "";
 
     public String getPipingSnippet() {
         return pipingSnippet;
     }
 
     public void setPipingSnippet(String pipingSnippet) {
-        this.pipingSnippet = pipingSnippet;
+        if (pipingSnippet != null) {
+            this.pipingSnippet = pipingSnippet;
+        } else {
+            this.pipingSnippet = "";
+        }
     }
 
     public String getSourceQuestionKey() {
@@ -18,6 +24,26 @@ public class PipingBean {
     }
 
     public void setSourceQuestionKey(String sourceQuestionKey) {
-        this.sourceQuestionKey = sourceQuestionKey;
+        if (sourceQuestionKey != null) {
+            this.sourceQuestionKey = sourceQuestionKey;
+        } else {
+            this.sourceQuestionKey = "";
+        }
+    }
+
+    public String getActivityId() {
+        return activityId;
+    }
+
+    public void setActivityId(String activityId) {
+        this.activityId = activityId;
+    }
+
+    public String getActivityVersion() {
+        return activityVersion;
+    }
+
+    public void setActivityVersion(String activityVersion) {
+        this.activityVersion = activityVersion;
     }
 }

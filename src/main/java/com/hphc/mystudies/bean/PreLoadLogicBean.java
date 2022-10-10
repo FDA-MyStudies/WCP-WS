@@ -29,7 +29,11 @@ public class PreLoadLogicBean {
     }
 
     public void setActivityId(String activityId) {
-        this.activityId = activityId;
+        if (activityId != null) {
+            this.activityId = activityId;
+        } else {
+            this.activityId = "";
+        }
     }
 
     public String getActivityVersion() {
@@ -37,7 +41,12 @@ public class PreLoadLogicBean {
     }
 
     public void setActivityVersion(String activityVersion) {
-        this.activityVersion = activityVersion;
+        if (activityVersion != null) {
+            this.activityVersion = activityVersion;
+        } else {
+            this.activityVersion = "";
+        }
+
     }
 
     public String getDestinationStepKey() {
@@ -45,6 +54,10 @@ public class PreLoadLogicBean {
     }
 
     public void setDestinationStepKey(String destinationStepKey) {
-        this.destinationStepKey = destinationStepKey;
+        if (destinationStepKey != null) {
+            this.destinationStepKey = destinationStepKey;
+        } else {
+            this.destinationStepKey = "";
+        }
     }
 }

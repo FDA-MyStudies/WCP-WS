@@ -103,13 +103,25 @@ public class QuestionnairesStepsDto implements Serializable {
   private Integer destinationTrueAsGroup;
 
   @Column(name = "is_piping")
-  private Integer isPiping;
+  private Boolean isPiping;
 
   @Column(name = "piping_snippet")
   private String pipingSnippet;
 
   @Column(name = "piping_source_question_key")
-  private String pipingSourceQuestionKey;
+  private Integer pipingSourceQuestionKey;
+
+  @Column(name = "is_different_survey")
+  private Boolean differentSurvey;
+
+  @Column(name = "piping_survey_Id")
+  private Integer pipingSurveyId;
+
+  @Column(name = "is_different_survey_pre_load")
+  private Boolean differentSurveyPreLoad;
+
+  @Column(name = "pre_load_survey_Id")
+  private Integer preLoadSurveyId;
 
   @Transient private String destinationStepType;
 
@@ -273,11 +285,11 @@ public class QuestionnairesStepsDto implements Serializable {
     this.destinationTrueAsGroup = destinationTrueAsGroup;
   }
 
-  public Integer getIsPiping() {
+  public Boolean getIsPiping() {
     return isPiping;
   }
 
-  public void setIsPiping(Integer isPiping) {
+  public void setIsPiping(Boolean isPiping) {
     this.isPiping = isPiping;
   }
 
@@ -289,11 +301,51 @@ public class QuestionnairesStepsDto implements Serializable {
     this.pipingSnippet = pipingSnippet;
   }
 
-  public String getPipingSourceQuestionKey() {
+  public Integer getPipingSourceQuestionKey() {
     return pipingSourceQuestionKey;
   }
 
-  public void setPipingSourceQuestionKey(String pipingSourceQuestionKey) {
+  public void setPipingSourceQuestionKey(Integer pipingSourceQuestionKey) {
     this.pipingSourceQuestionKey = pipingSourceQuestionKey;
+  }
+
+  public Boolean getPiping() {
+    return isPiping;
+  }
+
+  public void setPiping(Boolean piping) {
+    isPiping = piping;
+  }
+
+  public Boolean getDifferentSurvey() {
+    return differentSurvey;
+  }
+
+  public void setDifferentSurvey(Boolean differentSurvey) {
+    this.differentSurvey = differentSurvey;
+  }
+
+  public Integer getPipingSurveyId() {
+    return pipingSurveyId;
+  }
+
+  public void setPipingSurveyId(Integer pipingSurveyId) {
+    this.pipingSurveyId = pipingSurveyId;
+  }
+
+  public Boolean getDifferentSurveyPreLoad() {
+    return differentSurveyPreLoad;
+  }
+
+  public void setDifferentSurveyPreLoad(Boolean differentSurveyPreLoad) {
+    this.differentSurveyPreLoad = differentSurveyPreLoad;
+  }
+
+  public Integer getPreLoadSurveyId() {
+    return preLoadSurveyId;
+  }
+
+  public void setPreLoadSurveyId(Integer preLoadSurveyId) {
+    this.preLoadSurveyId = preLoadSurveyId;
   }
 }

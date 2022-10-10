@@ -2001,6 +2001,33 @@ public class ActivityMetaDataDao {
                   .setParameter("live", 1)
                   .uniqueResult();
           instructionBean.setHidden(count > 0);
+
+          String sourceKey = (String) session.createQuery("select stepShortTitle from QuestionnairesStepsDto where destinationTrueAsGroup=:destId")
+                  .setParameter("destId", instructionStepDetails.getStepId())
+                  .setMaxResults(1)
+                  .uniqueResult();
+
+          instructionBean.setSourceQuestionKey(sourceKey != null ? sourceKey : "");
+
+          PipingBean pipingBean = new PipingBean();
+          pipingBean.setPipingSnippet(instructionStepDetails.getPipingSnippet());
+          Integer pipingSrc = instructionStepDetails.getPipingSourceQuestionKey();
+          if (pipingSrc != null) {
+            QuestionnairesStepsDto stepsDto = session.get(QuestionnairesStepsDto.class, pipingSrc);
+            if (stepsDto != null) {
+              pipingBean.setSourceQuestionKey(stepsDto.getStepShortTitle());
+              if (instructionStepDetails.getDifferentSurvey() != null && instructionStepDetails.getDifferentSurvey()) {
+                QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class, stepsDto.getQuestionnairesId());
+                if (questionnairesDto != null) {
+                  pipingBean.setActivityId(questionnairesDto.getShortTitle());
+                  pipingBean.setActivityVersion(questionnairesDto.getVersion() != null ? String.valueOf(questionnairesDto.getVersion()) : "");
+                }
+              }
+            }
+          }
+          instructionBean.setPipingLogic(pipingBean);
+          instructionBean.setPiping(instructionStepDetails.getIsPiping());
+
           stepsSequenceTreeMap.put(
                   sequenceNoMap.get(
                           (instructionsDto.getId()
@@ -2307,7 +2334,6 @@ public class ActivityMetaDataDao {
           }
 
           // setting survey data
-          questionBean.setSourceQuestionKey(questionStepDetails.getStepShortTitle());
           questionBean.setDefaultVisibility(questionStepDetails.getDefaultVisibility());
           if (questionStepDetails.getDefaultVisibility() != null && !questionStepDetails.getDefaultVisibility()) {
             questionBean.setSkippable(false);
@@ -2320,7 +2346,6 @@ public class ActivityMetaDataDao {
                   .setParameter("live", 1)
                   .uniqueResult();
           questionBean.setHidden(count > 0);
-//        Todo after piping functionality questionBean.setPiping(false);
           List<PreLoadLogicDto> preLoadLogicDtoList = logicDtoMap.get(questionStepDetails.getStepId());
           PreLoadLogicBean preLoadLogicBean = new PreLoadLogicBean();
           StringBuilder value = new StringBuilder();
@@ -2337,12 +2362,7 @@ public class ActivityMetaDataDao {
               }
             }
             if (StringUtils.isNotBlank(preLoadLogicDto.getConditionOperator())) {
-              if (i == index) {
-                operator.append(preLoadLogicDto.getConditionOperator());
-              }
-              else {
                 operator.append(preLoadLogicDto.getConditionOperator()).append(delimiter);
-              }
             }
             if (StringUtils.isNotBlank(preLoadLogicDto.getOperator())) {
               if (i == index) {
@@ -2354,24 +2374,51 @@ public class ActivityMetaDataDao {
             }
             i++;
           }
-          if (questionStepDetails.getDestinationTrueAsGroup() != null) {
-            QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class,
-                    questionStepDetails.getDestinationTrueAsGroup());
+          Integer trueDest = questionStepDetails.getDestinationTrueAsGroup();
+          if (trueDest != null) {
+            QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class, trueDest);
             if (questionnairesStepsDto != null) {
+              questionBean.setSourceQuestionKey(questionnairesStepsDto.getStepShortTitle());
               preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
-              QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
-                      questionnairesStepsDto.getQuestionnairesId());
-              if (questionnairesDto != null) {
-                preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
-                preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+              // if different survey question then do below logic
+              if (questionStepDetails.getDifferentSurveyPreLoad() != null && questionStepDetails.getDifferentSurveyPreLoad()) {
+                QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
+                        questionnairesStepsDto.getQuestionnairesId());
+                if (questionnairesDto != null) {
+                  preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
+                  preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+                }
               }
             }
           }
+
+          String sourceKey = (String) session.createQuery("select stepShortTitle from QuestionnairesStepsDto where destinationTrueAsGroup=:destId")
+                  .setParameter("destId", questionStepDetails.getStepId())
+                  .setMaxResults(1)
+                  .uniqueResult();
+
+          questionBean.setSourceQuestionKey(sourceKey != null ? sourceKey : "");
           preLoadLogicBean.setValue(value.toString());
           preLoadLogicBean.setOperator(operator.toString());
           questionBean.setPreLoadLogic(preLoadLogicBean);
-          questionBean.setPipingLogic(new PipingBean());
-//        Todo after piping functionality
+          PipingBean pipingBean = new PipingBean();
+          pipingBean.setPipingSnippet(questionStepDetails.getPipingSnippet());
+          Integer pipingSrc = questionStepDetails.getPipingSourceQuestionKey();
+          if (pipingSrc != null) {
+            QuestionnairesStepsDto stepsDto = session.get(QuestionnairesStepsDto.class, pipingSrc);
+            if (stepsDto != null) {
+              pipingBean.setSourceQuestionKey(stepsDto.getStepShortTitle());
+              if (questionStepDetails.getDifferentSurvey() != null && questionStepDetails.getDifferentSurvey()) {
+                QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class, stepsDto.getQuestionnairesId());
+                if (questionnairesDto != null) {
+                  pipingBean.setActivityId(questionnairesDto.getShortTitle());
+                  pipingBean.setActivityVersion(questionnairesDto.getVersion() != null ? String.valueOf(questionnairesDto.getVersion()) : "");
+                }
+              }
+            }
+          }
+          questionBean.setPipingLogic(pipingBean);
+          questionBean.setPiping(questionStepDetails.getIsPiping());
 
           stepsSequenceTreeMap.put(
                   sequenceNoMap.get(
@@ -2583,22 +2630,33 @@ public class ActivityMetaDataDao {
                   .setParameter("live", 1)
                   .uniqueResult();
           formBean.setHidden(count > 0);
-//        Todo after piping functionality questionBean.setPiping(false);
           List<PreLoadLogicDto> preLoadLogicDtoList = logicDtoMap.get(formStepDetails.getStepId());
           PreLoadLogicBean preLoadLogicBean = new PreLoadLogicBean();
           StringBuilder value = new StringBuilder();
           StringBuilder operator = new StringBuilder();
           String delimiter = ":";
+          int index = preLoadLogicDtoList.size() - 1;
+          int i = 0;
           for (PreLoadLogicDto preLoadLogicDto : preLoadLogicDtoList) {
             if (StringUtils.isNotBlank(preLoadLogicDto.getInputValue())) {
-              value.append(preLoadLogicDto.getInputValue()).append(delimiter);
+              if (i == index) {
+                value.append(preLoadLogicDto.getInputValue());
+              } else {
+                value.append(preLoadLogicDto.getInputValue()).append(delimiter);
+              }
             }
             if (StringUtils.isNotBlank(preLoadLogicDto.getConditionOperator())) {
               operator.append(preLoadLogicDto.getConditionOperator()).append(delimiter);
             }
             if (StringUtils.isNotBlank(preLoadLogicDto.getOperator())) {
-              operator.append(preLoadLogicDto.getOperator()).append(delimiter);
+              if (i == index) {
+                operator.append(preLoadLogicDto.getOperator());
+              }
+              else {
+                operator.append(preLoadLogicDto.getOperator()).append(delimiter);
+              }
             }
+            i++;
           }
           if (formStepDetails.getDestinationTrueAsGroup() != null) {
             QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class,
@@ -2613,11 +2671,34 @@ public class ActivityMetaDataDao {
               }
             }
           }
+
+          String sourceKey = (String) session.createQuery("select stepShortTitle from QuestionnairesStepsDto where destinationTrueAsGroup=:destId")
+                  .setParameter("destId", formStepDetails.getStepId())
+                  .setMaxResults(1)
+                  .uniqueResult();
+
+          formBean.setSourceQuestionKey(sourceKey != null ? sourceKey : "");
           preLoadLogicBean.setValue(value.toString());
           preLoadLogicBean.setOperator(operator.toString());
           formBean.setPreLoadLogic(preLoadLogicBean);
-          formBean.setPipingLogic(new PipingBean());
-//        Todo after piping functionality  questionBean.setPiping(new PipingBean());
+          PipingBean pipingBean = new PipingBean();
+          pipingBean.setPipingSnippet(formStepDetails.getPipingSnippet());
+          Integer pipingSrc = formStepDetails.getPipingSourceQuestionKey();
+          if (pipingSrc != null) {
+            QuestionnairesStepsDto stepsDto = session.get(QuestionnairesStepsDto.class, pipingSrc);
+            if (stepsDto != null) {
+              pipingBean.setSourceQuestionKey(stepsDto.getStepShortTitle());
+              if (formStepDetails.getDifferentSurvey() != null && formStepDetails.getDifferentSurvey()) {
+                QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class, stepsDto.getQuestionnairesId());
+                if (questionnairesDto != null) {
+                  pipingBean.setActivityId(questionnairesDto.getShortTitle());
+                  pipingBean.setActivityVersion(questionnairesDto.getVersion() != null ? String.valueOf(questionnairesDto.getVersion()) : "");
+                }
+              }
+            }
+          }
+          formBean.setPipingLogic(pipingBean);
+          formBean.setPiping(formStepDetails.getIsPiping());
 
           stepsSequenceTreeMap.put(
               sequenceNoMap.get(

@@ -175,7 +175,7 @@ public class QuestionnaireActivityStepsBean {
 
   public void setDefaultVisibility(Boolean defaultVisibility) {
     if (defaultVisibility == null) {
-      this.defaultVisibility = false;
+      this.defaultVisibility = true;
     } else {
       this.defaultVisibility = defaultVisibility;
     }

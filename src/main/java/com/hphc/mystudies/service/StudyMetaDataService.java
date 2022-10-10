@@ -610,8 +610,8 @@ public class StudyMetaDataService {
         new QuestionnaireActivityMetaDataResponse();
     ActiveTaskActivityMetaDataResponse activeTaskActivityMetaDataResponse =
         new ActiveTaskActivityMetaDataResponse();
-    Boolean isValidFlag = false;
-    Boolean isActivityTypeQuestionnaire = false;
+    boolean isValidFlag = false;
+    boolean isActivityTypeQuestionnaire = false;
     try {
       if (StringUtils.isNotEmpty(studyId)
           && StringUtils.isNotEmpty(activityId)
@@ -685,6 +685,7 @@ public class StudyMetaDataService {
                     StudyMetaDataUtil.getTranslatedText(language, MultiLanguageConstants.NO_RECORD))
                 .build();
           }
+          LOGGER.info("INFO: StudyMetaDataService - studyActivityMetadata() :: ends");
           return questionnaireActivityMetaDataResponse;
         }
       } else {
@@ -693,6 +694,7 @@ public class StudyMetaDataService {
             ErrorCodes.INVALID_INPUT,
             StudyMetaDataUtil.getTranslatedText(language, MultiLanguageConstants.INVALID_INPUT),
             response);
+        LOGGER.info("ERROR: StudyMetaDataService - studyActivityMetadata() :: BAD Request");
         return Response.status(Response.Status.BAD_REQUEST)
             .entity(
                 StudyMetaDataUtil.getTranslatedText(language, MultiLanguageConstants.INVALID_INPUT))
@@ -1199,7 +1201,7 @@ public class StudyMetaDataService {
   /**
    * Get eligibility and consent info for the provided study identifier
    *
-   * @param studyId the Study Idetifier
+   * @param token is string
    * @param context {@link ServletContext}
    * @param response {@link HttpServletResponse}
    * @return {@link EligibilityConsentResponse}
