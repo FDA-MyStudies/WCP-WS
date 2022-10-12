@@ -728,7 +728,8 @@ public class AppMetaDataDao {
           String appId,
           String appName,
           String osType,
-          String appVersion)
+          String appVersion,
+          String orgId)
           throws DAOException {
     LOGGER.info("INFO: AppMetaDataDao - updateAppVersionDetails() :: Starts");
     Session session = null;
@@ -754,6 +755,7 @@ public class AppMetaDataDao {
       transaction = session.beginTransaction();
       versionInfoDTO.setAppId(appId);
       versionInfoDTO.setAppName(appName);
+      versionInfoDTO.setOrgId(orgId);
       if (StudyMetaDataConstants.STUDY_PLATFORM_ANDROID.equals(osType)) {
         versionInfoDTO.setAndroidVersion(appVersion);
       } else if (StudyMetaDataConstants.STUDY_PLATFORM_IOS.equals(osType)) {

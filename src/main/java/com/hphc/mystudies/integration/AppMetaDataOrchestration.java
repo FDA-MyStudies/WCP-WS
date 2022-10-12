@@ -384,12 +384,13 @@ public class AppMetaDataOrchestration {
           String appId,
           String appName,
           String appVersion,
-          String osType) {
+          String osType,
+          String orgId) {
     LOGGER.info("INFO: AppMetaDataOrchestration - updateAppVersionDetails() :: Starts");
     String updateAppVersionResponse = "OOPS! Something went wrong.";
     try {
       updateAppVersionResponse =
-              appMetaDataDao.updateAppVersionDetails(appId, appName, osType, appVersion);
+              appMetaDataDao.updateAppVersionDetails(appId, appName, osType, appVersion, orgId);
     } catch (Exception e) {
       LOGGER.error("AppMetaDataOrchestration - updateAppVersionDetails() :: ERROR", e);
     }

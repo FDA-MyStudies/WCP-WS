@@ -1527,6 +1527,7 @@ public class StudyMetaDataService {
       String appId = serviceJson.getString("appId");
       String appName = serviceJson.getString("appName");
       String appVersion = serviceJson.getString("appVersion");
+      String orgId = serviceJson.getString("orgId");
       String osType = serviceJson.getString(StudyMetaDataEnum.QF_OS_TYPE.value());
       if (StringUtils.isNotEmpty(appId)
               && StringUtils.isNotEmpty(appName)
@@ -1545,7 +1546,7 @@ public class StudyMetaDataService {
         }
 
         updateAppVersionResponse =
-                appMetaDataOrchestration.updateAppVersionDetails(appId, appName, appVersion, osType);
+                appMetaDataOrchestration.updateAppVersionDetails(appId, appName, appVersion, osType, orgId);
       } else {
         StudyMetaDataUtil.getFailureResponse(
                 ErrorCodes.STATUS_102,
