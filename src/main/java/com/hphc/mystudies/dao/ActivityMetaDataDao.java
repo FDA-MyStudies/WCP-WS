@@ -5551,16 +5551,15 @@ public class ActivityMetaDataDao {
   public InstructionsLangBO getInstructionLangBo(int instructionId, String language) {
     LOGGER.info("ActivityMetaDataDao - getInstructionLangBo - Starts");
     InstructionsLangBO instructionsLangBO = null;
-    try {
-      Session session = sessionFactory.openSession();
+    try (Session session = sessionFactory.openSession()) {
       instructionsLangBO =
-          (InstructionsLangBO)
-              session
-                  .createQuery(
-                      "from InstructionsLangBO ILB where ILB.instructionLangPK.langCode=:language and ILB.instructionLangPK.id=:id")
-                  .setString("language", language)
-                  .setInteger("id", instructionId)
-                  .uniqueResult();
+              (InstructionsLangBO)
+                      session
+                              .createQuery(
+                                      "from InstructionsLangBO ILB where ILB.instructionLangPK.langCode=:language and ILB.instructionLangPK.id=:id")
+                              .setString("language", language)
+                              .setInteger("id", instructionId)
+                              .uniqueResult();
     } catch (Exception e) {
       LOGGER.error("ActivityMetaDataDao - getInstructionLangBo - Error : ", e);
     }
@@ -5571,16 +5570,15 @@ public class ActivityMetaDataDao {
   public FormLangBO getFormLangBo(int formId, String language) {
     LOGGER.info("ActivityMetaDataDao - getFormLangBo - Starts");
     FormLangBO formLangBO = null;
-    try {
-      Session session = sessionFactory.openSession();
+    try (Session session = sessionFactory.openSession()) {
       formLangBO =
-          (FormLangBO)
-              session
-                  .createQuery(
-                      "from FormLangBO FLB where FLB.formLangPK.langCode=:language and FLB.formLangPK.formId=:id")
-                  .setString("language", language)
-                  .setInteger("id", formId)
-                  .uniqueResult();
+              (FormLangBO)
+                      session
+                              .createQuery(
+                                      "from FormLangBO FLB where FLB.formLangPK.langCode=:language and FLB.formLangPK.formId=:id")
+                              .setString("language", language)
+                              .setInteger("id", formId)
+                              .uniqueResult();
     } catch (Exception e) {
       LOGGER.error("ActivityMetaDataDao - getFormLangBo - Error : ", e);
     }
@@ -5591,16 +5589,15 @@ public class ActivityMetaDataDao {
   public QuestionLangBO getQuestionLangBo(int id, String language) {
     LOGGER.info("ActivityMetaDataDao - getQuestionLangBo - Starts");
     QuestionLangBO questionLangBO = null;
-    try {
-      Session session = sessionFactory.openSession();
+    try (Session session = sessionFactory.openSession()) {
       questionLangBO =
-          (QuestionLangBO)
-              session
-                  .createQuery(
-                      "from QuestionLangBO QLB where QLB.questionLangPK.langCode=:language and QLB.questionLangPK.id=:id")
-                  .setString("language", language)
-                  .setInteger("id", id)
-                  .uniqueResult();
+              (QuestionLangBO)
+                      session
+                              .createQuery(
+                                      "from QuestionLangBO QLB where QLB.questionLangPK.langCode=:language and QLB.questionLangPK.id=:id")
+                              .setString("language", language)
+                              .setInteger("id", id)
+                              .uniqueResult();
     } catch (Exception e) {
       LOGGER.error("ActivityMetaDataDao - getQuestionLangBo - Error : ", e);
     }

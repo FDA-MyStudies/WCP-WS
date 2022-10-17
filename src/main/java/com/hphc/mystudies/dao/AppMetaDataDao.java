@@ -680,6 +680,10 @@ public class AppMetaDataDao {
                   .uniqueResult();
     } catch (Exception e) {
       LOGGER.error("ERROR: AppMetaDataDao - getAppVersionInfo()", e);
+    } finally {
+      if (session != null) {
+        session.close();
+      }
     }
     LOGGER.info("INFO: AppMetaDataDao - getAppVersionInfo() :: Ends");
     return appVersionInfo;
