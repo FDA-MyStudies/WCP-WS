@@ -2651,11 +2651,13 @@ public class ActivityMetaDataDao {
                         formStepDetails.getDestinationTrueAsGroup());
                 if (questionnairesStepsDto != null) {
                   preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
-                  QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
-                          questionnairesStepsDto.getQuestionnairesId());
-                  if (questionnairesDto != null) {
-                    preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
-                    preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+                  if (formStepDetails.getDifferentSurveyPreLoad() != null && formStepDetails.getDifferentSurveyPreLoad()) {
+                    QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
+                            questionnairesStepsDto.getQuestionnairesId());
+                    if (questionnairesDto != null) {
+                      preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
+                      preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+                    }
                   }
                 }
               }
