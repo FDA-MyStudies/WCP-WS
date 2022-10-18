@@ -2378,8 +2378,18 @@ public class ActivityMetaDataDao {
           if (trueDest != null) {
             QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class, trueDest);
             if (questionnairesStepsDto != null) {
-              questionBean.setSourceQuestionKey(questionnairesStepsDto.getStepShortTitle());
-              preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
+              String stepShortTitle = questionnairesStepsDto.getStepShortTitle();
+              questionBean.setSourceQuestionKey(stepShortTitle);
+              if (StudyMetaDataConstants.QUESTIONAIRE_STEP_TYPE_FORM.equals(questionnairesStepsDto.getStepType())) {
+                Integer questionId = (Integer) session.createQuery("select questionId from FormMappingDto where formId = :formId order by sequenceNo desc")
+                        .setParameter("formId", questionnairesStepsDto.getInstructionFormId())
+                        .setMaxResults(1)
+                        .uniqueResult();
+                QuestionsDto que = session.get(QuestionsDto.class, questionId);
+                preLoadLogicBean.setDestinationStepKey(que.getShortTitle());
+              } else {
+                preLoadLogicBean.setDestinationStepKey(stepShortTitle);
+              }
               // if different survey question then do below logic
               if (questionStepDetails.getDifferentSurveyPreLoad() != null && questionStepDetails.getDifferentSurveyPreLoad()) {
                 QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
@@ -2617,7 +2627,6 @@ public class ActivityMetaDataDao {
           formBean.setSteps(formSteps);
 
           // setting survey data
-          formBean.setSourceQuestionKey(formStepDetails.getStepShortTitle());
           formBean.setDefaultVisibility(formStepDetails.getDefaultVisibility());
           if (formStepDetails.getDefaultVisibility() != null && !formStepDetails.getDefaultVisibility()) {
             formBean.setSkippable(false);
@@ -2662,7 +2671,16 @@ public class ActivityMetaDataDao {
             QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class,
                     formStepDetails.getDestinationTrueAsGroup());
             if (questionnairesStepsDto != null) {
-              preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
+              if (StudyMetaDataConstants.QUESTIONAIRE_STEP_TYPE_FORM.equals(questionnairesStepsDto.getStepType())) {
+                Integer questionId = (Integer) session.createQuery("select questionId from FormMappingDto where formId = :formId order by sequenceNo desc")
+                        .setParameter("formId", questionnairesStepsDto.getInstructionFormId())
+                        .setMaxResults(1)
+                        .uniqueResult();
+                QuestionsDto que = session.get(QuestionsDto.class, questionId);
+                preLoadLogicBean.setDestinationStepKey(que.getShortTitle());
+              } else {
+                preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
+              }
               QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
                       questionnairesStepsDto.getQuestionnairesId());
               if (questionnairesDto != null) {
@@ -2672,12 +2690,12 @@ public class ActivityMetaDataDao {
             }
           }
 
-          String sourceKey = (String) session.createQuery("select stepShortTitle from QuestionnairesStepsDto where destinationTrueAsGroup=:destId")
-                  .setParameter("destId", formStepDetails.getStepId())
-                  .setMaxResults(1)
-                  .uniqueResult();
-
-          formBean.setSourceQuestionKey(sourceKey != null ? sourceKey : "");
+//          String sourceKey = (String) session.createQuery("select stepShortTitle from QuestionnairesStepsDto where destinationTrueAsGroup=:destId")
+//                  .setParameter("destId", formStepDetails.getStepId())
+//                  .setMaxResults(1)
+//                  .uniqueResult();
+//
+//          formBean.setSourceQuestionKey(sourceKey != null ? sourceKey : "");
           preLoadLogicBean.setValue(value.toString());
           preLoadLogicBean.setOperator(operator.toString());
           formBean.setPreLoadLogic(preLoadLogicBean);
