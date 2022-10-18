@@ -2378,18 +2378,8 @@ public class ActivityMetaDataDao {
           if (trueDest != null) {
             QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class, trueDest);
             if (questionnairesStepsDto != null) {
-              String stepShortTitle = questionnairesStepsDto.getStepShortTitle();
-              questionBean.setSourceQuestionKey(stepShortTitle);
-              if (StudyMetaDataConstants.QUESTIONAIRE_STEP_TYPE_FORM.equals(questionnairesStepsDto.getStepType())) {
-                Integer questionId = (Integer) session.createQuery("select questionId from FormMappingDto where formId = :formId order by sequenceNo desc")
-                        .setParameter("formId", questionnairesStepsDto.getInstructionFormId())
-                        .setMaxResults(1)
-                        .uniqueResult();
-                QuestionsDto que = session.get(QuestionsDto.class, questionId);
-                preLoadLogicBean.setDestinationStepKey(que.getShortTitle());
-              } else {
-                preLoadLogicBean.setDestinationStepKey(stepShortTitle);
-              }
+              questionBean.setSourceQuestionKey(questionnairesStepsDto.getStepShortTitle());
+              preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
               // if different survey question then do below logic
               if (questionStepDetails.getDifferentSurveyPreLoad() != null && questionStepDetails.getDifferentSurveyPreLoad()) {
                 QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
@@ -2621,16 +2611,76 @@ public class ActivityMetaDataDao {
             }
           }
 
+          int size = formQuestionMap.size();
+          int i = 1;
           for (Integer key : formQuestionMap.keySet()) {
-            formSteps.add(formStepsMap.get(formQuestionMap.get(key)));
+            QuestionnaireActivityStepsBean stepsBean = formStepsMap.get(formQuestionMap.get(key));
+            // if last question
+            if (i == size) {
+              List<PreLoadLogicDto> preLoadLogicDtoList = logicDtoMap.get(formStepDetails.getStepId());
+              PreLoadLogicBean preLoadLogicBean = new PreLoadLogicBean();
+              StringBuilder value = new StringBuilder();
+              StringBuilder operator = new StringBuilder();
+              String delimiter = ":";
+              int index = preLoadLogicDtoList.size();
+              int j = 1;
+              for (PreLoadLogicDto preLoadLogicDto : preLoadLogicDtoList) {
+                if (StringUtils.isNotBlank(preLoadLogicDto.getInputValue())) {
+                  if (j == index) {
+                    value.append(preLoadLogicDto.getInputValue());
+                  } else {
+                    value.append(preLoadLogicDto.getInputValue()).append(delimiter);
+                  }
+                }
+                if (StringUtils.isNotBlank(preLoadLogicDto.getConditionOperator())) {
+                  operator.append(preLoadLogicDto.getConditionOperator()).append(delimiter);
+                }
+                if (StringUtils.isNotBlank(preLoadLogicDto.getOperator())) {
+                  if (j == index) {
+                    operator.append(preLoadLogicDto.getOperator());
+                  }
+                  else {
+                    operator.append(preLoadLogicDto.getOperator()).append(delimiter);
+                  }
+                }
+                j++;
+              }
+
+              if (formStepDetails.getDestinationTrueAsGroup() != null) {
+                QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class,
+                        formStepDetails.getDestinationTrueAsGroup());
+                if (questionnairesStepsDto != null) {
+                  preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
+                  QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
+                          questionnairesStepsDto.getQuestionnairesId());
+                  if (questionnairesDto != null) {
+                    preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
+                    preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+                  }
+                }
+              }
+
+              preLoadLogicBean.setValue(value.toString());
+              preLoadLogicBean.setOperator(operator.toString());
+              stepsBean.setDefaultVisibility(formStepDetails.getDefaultVisibility());
+              stepsBean.setPreLoadLogic(preLoadLogicBean);
+            }
+            i++;
+            formSteps.add(stepsBean);
           }
           formBean.setSteps(formSteps);
 
           // setting survey data
-          formBean.setDefaultVisibility(formStepDetails.getDefaultVisibility());
           if (formStepDetails.getDefaultVisibility() != null && !formStepDetails.getDefaultVisibility()) {
             formBean.setSkippable(false);
           }
+
+          String sourceKey = (String) session.createQuery("select stepShortTitle from QuestionnairesStepsDto where destinationTrueAsGroup=:destId")
+                  .setParameter("destId", formStepDetails.getStepId())
+                  .setMaxResults(1)
+                  .uniqueResult();
+
+          formBean.setSourceQuestionKey(sourceKey != null ? sourceKey : "");
 
           long count = 0;
           count = (long) session.createQuery("select count(*) from QuestionnairesDto where id in (" +
@@ -2639,84 +2689,9 @@ public class ActivityMetaDataDao {
                   .setParameter("live", 1)
                   .uniqueResult();
           formBean.setHidden(count > 0);
-          List<PreLoadLogicDto> preLoadLogicDtoList = logicDtoMap.get(formStepDetails.getStepId());
-          PreLoadLogicBean preLoadLogicBean = new PreLoadLogicBean();
-          StringBuilder value = new StringBuilder();
-          StringBuilder operator = new StringBuilder();
-          String delimiter = ":";
-          int index = preLoadLogicDtoList.size() - 1;
-          int i = 0;
-          for (PreLoadLogicDto preLoadLogicDto : preLoadLogicDtoList) {
-            if (StringUtils.isNotBlank(preLoadLogicDto.getInputValue())) {
-              if (i == index) {
-                value.append(preLoadLogicDto.getInputValue());
-              } else {
-                value.append(preLoadLogicDto.getInputValue()).append(delimiter);
-              }
-            }
-            if (StringUtils.isNotBlank(preLoadLogicDto.getConditionOperator())) {
-              operator.append(preLoadLogicDto.getConditionOperator()).append(delimiter);
-            }
-            if (StringUtils.isNotBlank(preLoadLogicDto.getOperator())) {
-              if (i == index) {
-                operator.append(preLoadLogicDto.getOperator());
-              }
-              else {
-                operator.append(preLoadLogicDto.getOperator()).append(delimiter);
-              }
-            }
-            i++;
-          }
-          if (formStepDetails.getDestinationTrueAsGroup() != null) {
-            QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class,
-                    formStepDetails.getDestinationTrueAsGroup());
-            if (questionnairesStepsDto != null) {
-              if (StudyMetaDataConstants.QUESTIONAIRE_STEP_TYPE_FORM.equals(questionnairesStepsDto.getStepType())) {
-                Integer questionId = (Integer) session.createQuery("select questionId from FormMappingDto where formId = :formId order by sequenceNo desc")
-                        .setParameter("formId", questionnairesStepsDto.getInstructionFormId())
-                        .setMaxResults(1)
-                        .uniqueResult();
-                QuestionsDto que = session.get(QuestionsDto.class, questionId);
-                preLoadLogicBean.setDestinationStepKey(que.getShortTitle());
-              } else {
-                preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
-              }
-              QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
-                      questionnairesStepsDto.getQuestionnairesId());
-              if (questionnairesDto != null) {
-                preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
-                preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
-              }
-            }
-          }
 
-//          String sourceKey = (String) session.createQuery("select stepShortTitle from QuestionnairesStepsDto where destinationTrueAsGroup=:destId")
-//                  .setParameter("destId", formStepDetails.getStepId())
-//                  .setMaxResults(1)
-//                  .uniqueResult();
-//
-//          formBean.setSourceQuestionKey(sourceKey != null ? sourceKey : "");
-          preLoadLogicBean.setValue(value.toString());
-          preLoadLogicBean.setOperator(operator.toString());
-          formBean.setPreLoadLogic(preLoadLogicBean);
-          PipingBean pipingBean = new PipingBean();
-          pipingBean.setPipingSnippet(formStepDetails.getPipingSnippet());
-          Integer pipingSrc = formStepDetails.getPipingSourceQuestionKey();
-          if (pipingSrc != null) {
-            QuestionnairesStepsDto stepsDto = session.get(QuestionnairesStepsDto.class, pipingSrc);
-            if (stepsDto != null) {
-              pipingBean.setSourceQuestionKey(stepsDto.getStepShortTitle());
-              if (formStepDetails.getDifferentSurvey() != null && formStepDetails.getDifferentSurvey()) {
-                QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class, stepsDto.getQuestionnairesId());
-                if (questionnairesDto != null) {
-                  pipingBean.setActivityId(questionnairesDto.getShortTitle());
-                  pipingBean.setActivityVersion(questionnairesDto.getVersion() != null ? String.valueOf(questionnairesDto.getVersion()) : "");
-                }
-              }
-            }
-          }
-          formBean.setPipingLogic(pipingBean);
-          formBean.setPiping(formStepDetails.getIsPiping());
+          formBean.setPipingLogic(new PipingBean());
+          formBean.setPiping(false);
 
           stepsSequenceTreeMap.put(
               sequenceNoMap.get(
