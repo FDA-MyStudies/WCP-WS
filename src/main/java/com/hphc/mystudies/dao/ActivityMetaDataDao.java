@@ -2376,17 +2376,27 @@ public class ActivityMetaDataDao {
           }
           Integer trueDest = questionStepDetails.getDestinationTrueAsGroup();
           if (trueDest != null) {
-            QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class, trueDest);
-            if (questionnairesStepsDto != null) {
-              questionBean.setSourceQuestionKey(questionnairesStepsDto.getStepShortTitle());
-              preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
-              // if different survey question then do below logic
+            if (trueDest == 0) {
+              preLoadLogicBean.setDestinationStepKey("0");
               if (questionStepDetails.getDifferentSurveyPreLoad() != null && questionStepDetails.getDifferentSurveyPreLoad()) {
-                QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
-                        questionnairesStepsDto.getQuestionnairesId());
+                QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class, questionStepDetails.getPreLoadSurveyId());
                 if (questionnairesDto != null) {
                   preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
                   preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+                }
+              }
+            } else {
+              QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class, trueDest);
+              if (questionnairesStepsDto != null) {
+                preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
+                // if different survey question then do below logic
+                if (questionStepDetails.getDifferentSurveyPreLoad() != null && questionStepDetails.getDifferentSurveyPreLoad()) {
+                  QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
+                          questionnairesStepsDto.getQuestionnairesId());
+                  if (questionnairesDto != null) {
+                    preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
+                    preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+                  }
                 }
               }
             }
@@ -2396,7 +2406,6 @@ public class ActivityMetaDataDao {
                   .setParameter("destId", questionStepDetails.getStepId())
                   .setMaxResults(1)
                   .uniqueResult();
-
           questionBean.setSourceQuestionKey(sourceKey != null ? sourceKey : "");
           preLoadLogicBean.setValue(value.toString());
           preLoadLogicBean.setOperator(operator.toString());
@@ -2647,16 +2656,27 @@ public class ActivityMetaDataDao {
               }
 
               if (formStepDetails.getDestinationTrueAsGroup() != null) {
-                QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class,
-                        formStepDetails.getDestinationTrueAsGroup());
-                if (questionnairesStepsDto != null) {
-                  preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
+                if (formStepDetails.getDestinationTrueAsGroup() == 0) {
+                  preLoadLogicBean.setDestinationStepKey("0");
                   if (formStepDetails.getDifferentSurveyPreLoad() != null && formStepDetails.getDifferentSurveyPreLoad()) {
-                    QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
-                            questionnairesStepsDto.getQuestionnairesId());
+                    QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class, formStepDetails.getPreLoadSurveyId());
                     if (questionnairesDto != null) {
                       preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
                       preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+                    }
+                  }
+                } else {
+                  QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class,
+                          formStepDetails.getDestinationTrueAsGroup());
+                  if (questionnairesStepsDto != null) {
+                    preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
+                    if (formStepDetails.getDifferentSurveyPreLoad() != null && formStepDetails.getDifferentSurveyPreLoad()) {
+                      QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
+                              questionnairesStepsDto.getQuestionnairesId());
+                      if (questionnairesDto != null) {
+                        preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
+                        preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+                      }
                     }
                   }
                 }
@@ -2681,7 +2701,6 @@ public class ActivityMetaDataDao {
                   .setParameter("destId", formStepDetails.getStepId())
                   .setMaxResults(1)
                   .uniqueResult();
-
           formBean.setSourceQuestionKey(sourceKey != null ? sourceKey : "");
 
           long count = 0;
