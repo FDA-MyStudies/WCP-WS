@@ -1977,7 +1977,7 @@ public class StudyMetaDataDao {
                   .setString(StudyMetaDataEnum.QF_CUSTOM_STUDY_ID.value(), studyId)
                   .setMaxResults(1)
                   .uniqueResult();
-      isValidActivity = (activeTaskDto == null) ? false : true;
+      isValidActivity = activeTaskDto != null;
 
       if (!isValidActivity) {
         questionnaireDto =

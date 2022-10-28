@@ -602,6 +602,7 @@ public class StudyMetaDataService {
       @QueryParam("studyId") String studyId,
       @QueryParam("activityId") String activityId,
       @QueryParam("activityVersion") String activityVersion,
+      @QueryParam("isLive") Boolean isLive,
       @HeaderParam("language") String language,
       @Context ServletContext context,
       @Context HttpServletResponse response) {
@@ -671,7 +672,7 @@ public class StudyMetaDataService {
         } else {
           questionnaireActivityMetaDataResponse =
               activityMetaDataOrchestration.studyQuestionnaireActivityMetadata(
-                  studyId, activityId, activityVersion, language);
+                  studyId, activityId, activityVersion, language, (isLive != null ? isLive : true));
           if (!questionnaireActivityMetaDataResponse
               .getMessage()
               .equals(StudyMetaDataConstants.SUCCESS)) {
@@ -1524,15 +1525,12 @@ public class StudyMetaDataService {
     String updateAppVersionResponse = "OOPS! Something went wrong.";
     try {
       JSONObject serviceJson = new JSONObject(params);
-      String appId = serviceJson.getString("appId");
-      String appName = serviceJson.getString("appName");
-      String appVersion = serviceJson.getString("appVersion");
-      String orgId = serviceJson.getString("orgId");
+      String appId = serviceJson.has("appId") ? serviceJson.getString("appId") : null;
+      String appName = serviceJson.has("appName") ? serviceJson.getString("appName") : null;
+      String appVersion = serviceJson.has("appVersion") ? serviceJson.getString("appVersion") : null;
+      String orgId = serviceJson.has("orgId") ? serviceJson.getString("orgId") : null;
       String osType = serviceJson.getString(StudyMetaDataEnum.QF_OS_TYPE.value());
-      if (StringUtils.isNotEmpty(appId)
-              && StringUtils.isNotEmpty(appName)
-              && StringUtils.isNotEmpty(appVersion)
-              && StringUtils.isNotEmpty(osType)) {
+      if (StringUtils.isNoneBlank(appId, appName, appVersion, osType, orgId)) {
         if (!osType.equals(StudyMetaDataConstants.STUDY_PLATFORM_IOS)
                 && !osType.equals(StudyMetaDataConstants.STUDY_PLATFORM_ANDROID)) {
           StudyMetaDataUtil.getFailureResponse(

@@ -435,7 +435,7 @@ public class ActivityMetaDataDao {
    * @author BTC
    */
   public QuestionnaireActivityMetaDataResponse studyQuestionnaireActivityMetadata(
-      String studyId, String activityId, String activityVersion, String language)
+      String studyId, String activityId, String activityVersion, String language, boolean isLive)
       throws DAOException {
     LOGGER.info("INFO: ActivityMetaDataDao - studyQuestionnaireActivityMetadata() :: Starts");
     Session session = null;
@@ -455,7 +455,7 @@ public class ActivityMetaDataDao {
                   .uniqueResult();
       if (studyDto != null) {
         activityStructureBean =
-            this.questionnaireMetadata(studyId, activityId, session, activityVersion, language);
+            this.questionnaireMetadata(studyId, activityId, session, activityVersion, language, isLive);
         activityMetaDataResponse.setActivity(activityStructureBean);
         activityMetaDataResponse.setMessage(StudyMetaDataConstants.SUCCESS);
       } else {
@@ -757,7 +757,7 @@ public class ActivityMetaDataDao {
    */
   @SuppressWarnings("unchecked")
   public QuestionnaireActivityStructureBean questionnaireMetadata(
-      String studyId, String activityId, Session session, String activityVersion, String language)
+      String studyId, String activityId, Session session, String activityVersion, String language, boolean isLive)
       throws DAOException {
     LOGGER.info("INFO: ActivityMetaDataDao - questionnaireMetadata() :: Starts");
     QuestionnaireActivityStructureBean activityStructureBean =
@@ -770,20 +770,37 @@ public class ActivityMetaDataDao {
     List<QuestionnaireActivityStepsBean> steps = new ArrayList<>();
     List<QuestionResponsetypeMasterInfoDto> questionResponseTypeMasterInfoList = null;
     try {
-      questionnaireDto =
-          (QuestionnairesDto)
-              session
-                  .createQuery(
-                      "from QuestionnairesDto QDTO"
-                          + " where QDTO.customStudyId= :customStudyId and QDTO.shortTitle= :shortTitle"
-                          + " and QDTO.status=true and QDTO.live=1 and ROUND(QDTO.version, 1)= :version ORDER BY QDTO.id DESC")
-                  .setString(StudyMetaDataEnum.QF_CUSTOM_STUDY_ID.value(), studyId)
-                  .setString(
-                      StudyMetaDataEnum.QF_SHORT_TITLE.value(),
-                      StudyMetaDataUtil.replaceSingleQuotes(activityId))
-                  .setFloat(StudyMetaDataEnum.QF_VERSION.value(), Float.parseFloat(activityVersion))
-                  .setMaxResults(1)
-                  .uniqueResult();
+      if (isLive) {
+        questionnaireDto =
+                (QuestionnairesDto)
+                        session
+                                .createQuery(
+                                        "from QuestionnairesDto QDTO"
+                                                + " where QDTO.customStudyId= :customStudyId and QDTO.shortTitle= :shortTitle"
+                                                + " and QDTO.status=true and QDTO.live=1 and ROUND(QDTO.version, 1)= :version ORDER BY QDTO.id DESC")
+                                .setParameter(StudyMetaDataEnum.QF_CUSTOM_STUDY_ID.value(), studyId)
+                                .setParameter(
+                                        StudyMetaDataEnum.QF_SHORT_TITLE.value(),
+                                        StudyMetaDataUtil.replaceSingleQuotes(activityId))
+                                .setParameter(StudyMetaDataEnum.QF_VERSION.value(), Float.parseFloat(activityVersion))
+                                .setMaxResults(1)
+                                .uniqueResult();
+      } else {
+        questionnaireDto =
+                (QuestionnairesDto)
+                        session
+                                .createQuery(
+                                        "from QuestionnairesDto QDTO"
+                                                + " where QDTO.customStudyId= :customStudyId and QDTO.shortTitle= :shortTitle"
+                                                + " and QDTO.status=true and ROUND(QDTO.version, 1)= :version ORDER BY QDTO.id DESC")
+                                .setParameter(StudyMetaDataEnum.QF_CUSTOM_STUDY_ID.value(), studyId)
+                                .setParameter(
+                                        StudyMetaDataEnum.QF_SHORT_TITLE.value(),
+                                        StudyMetaDataUtil.replaceSingleQuotes(activityId))
+                                .setParameter(StudyMetaDataEnum.QF_VERSION.value(), Float.parseFloat(activityVersion))
+                                .setMaxResults(1)
+                                .uniqueResult();
+      }
       if (questionnaireDto != null) {
         activityStructureBean.setType(StudyMetaDataConstants.ACTIVITY_QUESTIONNAIRE);
 
