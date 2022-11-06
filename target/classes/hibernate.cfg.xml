@@ -142,5 +142,9 @@
             class="com.hphc.mystudies.dto.VersionInfoDTO"/>
     <mapping
             class="com.hphc.mystudies.dto.PreLoadLogicDto"/>
+    <mapping
+            class="com.hphc.mystudies.dto.GroupsDto"/>
+    <mapping
+            class="com.hphc.mystudies.dto.GroupMappingDto"/>
   </session-factory>
 </hibernate-configuration>

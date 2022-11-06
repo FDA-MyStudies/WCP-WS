@@ -123,6 +123,12 @@ public class QuestionnairesStepsDto implements Serializable {
   @Column(name = "pre_load_survey_Id")
   private Integer preLoadSurveyId;
 
+  @Column(name = "stepOrGroup")
+  private String stepOrGroup;
+
+  @Column(name = "stepOrGroupPostLoad")
+  private String stepOrGroupPostLoad;
+
   @Transient private String destinationStepType;
 
   public Integer getStepId() {
@@ -347,5 +353,21 @@ public class QuestionnairesStepsDto implements Serializable {
 
   public void setPreLoadSurveyId(Integer preLoadSurveyId) {
     this.preLoadSurveyId = preLoadSurveyId;
+  }
+
+  public String getStepOrGroup() {
+    return stepOrGroup;
+  }
+
+  public void setStepOrGroup(String stepOrGroup) {
+    this.stepOrGroup = stepOrGroup;
+  }
+
+  public String getStepOrGroupPostLoad() {
+    return stepOrGroupPostLoad;
+  }
+
+  public void setStepOrGroupPostLoad(String stepOrGroupPostLoad) {
+    this.stepOrGroupPostLoad = stepOrGroupPostLoad;
   }
 }
