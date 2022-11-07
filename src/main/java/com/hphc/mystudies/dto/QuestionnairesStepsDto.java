@@ -96,6 +96,39 @@ public class QuestionnairesStepsDto implements Serializable {
   @Column(name = "active")
   private Boolean active;
 
+  @Column(name = "default_visibility")
+  private Boolean defaultVisibility;
+
+  @Column(name = "destination_true_as_group")
+  private Integer destinationTrueAsGroup;
+
+  @Column(name = "is_piping")
+  private Boolean isPiping;
+
+  @Column(name = "piping_snippet")
+  private String pipingSnippet;
+
+  @Column(name = "piping_source_question_key")
+  private Integer pipingSourceQuestionKey;
+
+  @Column(name = "is_different_survey")
+  private Boolean differentSurvey;
+
+  @Column(name = "piping_survey_Id")
+  private Integer pipingSurveyId;
+
+  @Column(name = "is_different_survey_pre_load")
+  private Boolean differentSurveyPreLoad;
+
+  @Column(name = "pre_load_survey_Id")
+  private Integer preLoadSurveyId;
+
+  @Column(name = "stepOrGroup")
+  private String stepOrGroup;
+
+  @Column(name = "stepOrGroupPostLoad")
+  private String stepOrGroupPostLoad;
+
   @Transient private String destinationStepType;
 
   public Integer getStepId() {
@@ -240,5 +273,101 @@ public class QuestionnairesStepsDto implements Serializable {
 
   public void setDestinationStepType(String destinationStepType) {
     this.destinationStepType = destinationStepType;
+  }
+
+  public Boolean getDefaultVisibility() {
+    return defaultVisibility;
+  }
+
+  public void setDefaultVisibility(Boolean defaultVisibility) {
+    this.defaultVisibility = defaultVisibility;
+  }
+
+  public Integer getDestinationTrueAsGroup() {
+    return destinationTrueAsGroup;
+  }
+
+  public void setDestinationTrueAsGroup(Integer destinationTrueAsGroup) {
+    this.destinationTrueAsGroup = destinationTrueAsGroup;
+  }
+
+  public Boolean getIsPiping() {
+    return isPiping;
+  }
+
+  public void setIsPiping(Boolean isPiping) {
+    this.isPiping = isPiping;
+  }
+
+  public String getPipingSnippet() {
+    return pipingSnippet;
+  }
+
+  public void setPipingSnippet(String pipingSnippet) {
+    this.pipingSnippet = pipingSnippet;
+  }
+
+  public Integer getPipingSourceQuestionKey() {
+    return pipingSourceQuestionKey;
+  }
+
+  public void setPipingSourceQuestionKey(Integer pipingSourceQuestionKey) {
+    this.pipingSourceQuestionKey = pipingSourceQuestionKey;
+  }
+
+  public Boolean getPiping() {
+    return isPiping;
+  }
+
+  public void setPiping(Boolean piping) {
+    isPiping = piping;
+  }
+
+  public Boolean getDifferentSurvey() {
+    return differentSurvey;
+  }
+
+  public void setDifferentSurvey(Boolean differentSurvey) {
+    this.differentSurvey = differentSurvey;
+  }
+
+  public Integer getPipingSurveyId() {
+    return pipingSurveyId;
+  }
+
+  public void setPipingSurveyId(Integer pipingSurveyId) {
+    this.pipingSurveyId = pipingSurveyId;
+  }
+
+  public Boolean getDifferentSurveyPreLoad() {
+    return differentSurveyPreLoad;
+  }
+
+  public void setDifferentSurveyPreLoad(Boolean differentSurveyPreLoad) {
+    this.differentSurveyPreLoad = differentSurveyPreLoad;
+  }
+
+  public Integer getPreLoadSurveyId() {
+    return preLoadSurveyId;
+  }
+
+  public void setPreLoadSurveyId(Integer preLoadSurveyId) {
+    this.preLoadSurveyId = preLoadSurveyId;
+  }
+
+  public String getStepOrGroup() {
+    return stepOrGroup;
+  }
+
+  public void setStepOrGroup(String stepOrGroup) {
+    this.stepOrGroup = stepOrGroup;
+  }
+
+  public String getStepOrGroupPostLoad() {
+    return stepOrGroupPostLoad;
+  }
+
+  public void setStepOrGroupPostLoad(String stepOrGroupPostLoad) {
+    this.stepOrGroupPostLoad = stepOrGroupPostLoad;
   }
 }

@@ -41,6 +41,9 @@ public class QuestionnaireActivityStepsBean {
   private String title = "";
   private String text = "";
   private Boolean skippable = false;
+  private Boolean isHidden = false;
+  private String groupId = "";
+  private String sourceQuestionKey = "";
   private String groupName = "";
   private Boolean repeatable = false;
   private String repeatableText = "";
@@ -49,6 +52,10 @@ public class QuestionnaireActivityStepsBean {
   private Map<String, Object> format = new HashMap<>();
   private List<QuestionnaireActivityStepsBean> steps = new ArrayList<>();
   private String[] options = new String[0];
+  private Boolean defaultVisibility = true;
+  private Boolean isPiping = false;
+  private PreLoadLogicBean preLoadLogic = new PreLoadLogicBean();
+  private PipingBean pipingLogic = new PipingBean();
 
   public String getType() {
     return type;
@@ -160,5 +167,73 @@ public class QuestionnaireActivityStepsBean {
 
   public void setOptions(String[] options) {
     this.options = options;
+  }
+
+  public Boolean getDefaultVisibility() {
+    return defaultVisibility;
+  }
+
+  public void setDefaultVisibility(Boolean defaultVisibility) {
+    if (defaultVisibility == null) {
+      this.defaultVisibility = true;
+    } else {
+      this.defaultVisibility = defaultVisibility;
+    }
+  }
+
+  public PreLoadLogicBean getPreLoadLogic() {
+    return preLoadLogic;
+  }
+
+  public void setPreLoadLogic(PreLoadLogicBean preLoadLogic) {
+    this.preLoadLogic = preLoadLogic;
+  }
+
+  public Boolean getHidden() {
+    return isHidden;
+  }
+
+  public void setHidden(Boolean hidden) {
+    if (hidden == null) {
+      isHidden = false;
+    } else {
+      isHidden = hidden;
+    }
+  }
+
+  public String getGroupId() {
+    return groupId;
+  }
+
+  public void setGroupId(String groupId) {
+    this.groupId = groupId;
+  }
+
+  public String getSourceQuestionKey() {
+    return sourceQuestionKey;
+  }
+
+  public void setSourceQuestionKey(String sourceQuestionKey) {
+    this.sourceQuestionKey = sourceQuestionKey;
+  }
+
+  public Boolean getPiping() {
+    return isPiping;
+  }
+
+  public void setPiping(Boolean piping) {
+    if (piping == null) {
+      isPiping = false;
+    } else {
+      isPiping = piping;
+    }
+  }
+
+  public PipingBean getPipingLogic() {
+    return pipingLogic;
+  }
+
+  public void setPipingLogic(PipingBean pipingLogic) {
+    this.pipingLogic = pipingLogic;
   }
 }

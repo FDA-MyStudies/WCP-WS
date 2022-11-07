@@ -602,6 +602,7 @@ public class StudyMetaDataService {
       @QueryParam("studyId") String studyId,
       @QueryParam("activityId") String activityId,
       @QueryParam("activityVersion") String activityVersion,
+      @QueryParam("isLive") Boolean isLive,
       @HeaderParam("language") String language,
       @Context ServletContext context,
       @Context HttpServletResponse response) {
@@ -610,8 +611,8 @@ public class StudyMetaDataService {
         new QuestionnaireActivityMetaDataResponse();
     ActiveTaskActivityMetaDataResponse activeTaskActivityMetaDataResponse =
         new ActiveTaskActivityMetaDataResponse();
-    Boolean isValidFlag = false;
-    Boolean isActivityTypeQuestionnaire = false;
+    boolean isValidFlag = false;
+    boolean isActivityTypeQuestionnaire = false;
     try {
       if (StringUtils.isNotEmpty(studyId)
           && StringUtils.isNotEmpty(activityId)
@@ -671,7 +672,7 @@ public class StudyMetaDataService {
         } else {
           questionnaireActivityMetaDataResponse =
               activityMetaDataOrchestration.studyQuestionnaireActivityMetadata(
-                  studyId, activityId, activityVersion, language);
+                  studyId, activityId, activityVersion, language, (isLive != null ? isLive : true));
           if (!questionnaireActivityMetaDataResponse
               .getMessage()
               .equals(StudyMetaDataConstants.SUCCESS)) {
@@ -685,6 +686,7 @@ public class StudyMetaDataService {
                     StudyMetaDataUtil.getTranslatedText(language, MultiLanguageConstants.NO_RECORD))
                 .build();
           }
+          LOGGER.info("INFO: StudyMetaDataService - studyActivityMetadata() :: ends");
           return questionnaireActivityMetaDataResponse;
         }
       } else {
@@ -693,6 +695,7 @@ public class StudyMetaDataService {
             ErrorCodes.INVALID_INPUT,
             StudyMetaDataUtil.getTranslatedText(language, MultiLanguageConstants.INVALID_INPUT),
             response);
+        LOGGER.info("ERROR: StudyMetaDataService - studyActivityMetadata() :: BAD Request");
         return Response.status(Response.Status.BAD_REQUEST)
             .entity(
                 StudyMetaDataUtil.getTranslatedText(language, MultiLanguageConstants.INVALID_INPUT))
@@ -1199,7 +1202,7 @@ public class StudyMetaDataService {
   /**
    * Get eligibility and consent info for the provided study identifier
    *
-   * @param studyId the Study Idetifier
+   * @param token is string
    * @param context {@link ServletContext}
    * @param response {@link HttpServletResponse}
    * @return {@link EligibilityConsentResponse}
@@ -1522,14 +1525,12 @@ public class StudyMetaDataService {
     String updateAppVersionResponse = "OOPS! Something went wrong.";
     try {
       JSONObject serviceJson = new JSONObject(params);
-      String appId = serviceJson.getString("appId");
-      String appName = serviceJson.getString("appName");
-      String appVersion = serviceJson.getString("appVersion");
+      String appId = serviceJson.has("appId") ? serviceJson.getString("appId") : null;
+      String appName = serviceJson.has("appName") ? serviceJson.getString("appName") : null;
+      String appVersion = serviceJson.has("appVersion") ? serviceJson.getString("appVersion") : null;
+      String orgId = serviceJson.has("orgId") ? serviceJson.getString("orgId") : null;
       String osType = serviceJson.getString(StudyMetaDataEnum.QF_OS_TYPE.value());
-      if (StringUtils.isNotEmpty(appId)
-              && StringUtils.isNotEmpty(appName)
-              && StringUtils.isNotEmpty(appVersion)
-              && StringUtils.isNotEmpty(osType)) {
+      if (StringUtils.isNoneBlank(appId, appName, appVersion, osType, orgId)) {
         if (!osType.equals(StudyMetaDataConstants.STUDY_PLATFORM_IOS)
                 && !osType.equals(StudyMetaDataConstants.STUDY_PLATFORM_ANDROID)) {
           StudyMetaDataUtil.getFailureResponse(
@@ -1543,7 +1544,7 @@ public class StudyMetaDataService {
         }
 
         updateAppVersionResponse =
-                appMetaDataOrchestration.updateAppVersionDetails(appId, appName, appVersion, osType);
+                appMetaDataOrchestration.updateAppVersionDetails(appId, appName, appVersion, osType, orgId);
       } else {
         StudyMetaDataUtil.getFailureResponse(
                 ErrorCodes.STATUS_102,

@@ -22,25 +22,7 @@
  */
 package com.hphc.mystudies.dao;
 
-import com.hphc.mystudies.bean.ActiveTaskActivityMetaDataResponse;
-import com.hphc.mystudies.bean.ActiveTaskActivityStepsBean;
-import com.hphc.mystudies.bean.ActiveTaskActivityStructureBean;
-import com.hphc.mystudies.bean.ActivitiesBean;
-import com.hphc.mystudies.bean.ActivityAnchorDateBean;
-import com.hphc.mystudies.bean.ActivityAnchorEndBean;
-import com.hphc.mystudies.bean.ActivityAnchorStartBean;
-import com.hphc.mystudies.bean.ActivityFrequencyAnchorRunsBean;
-import com.hphc.mystudies.bean.ActivityFrequencyBean;
-import com.hphc.mystudies.bean.ActivityFrequencyScheduleBean;
-import com.hphc.mystudies.bean.ActivityMetadataBean;
-import com.hphc.mystudies.bean.ActivityResponse;
-import com.hphc.mystudies.bean.DestinationBean;
-import com.hphc.mystudies.bean.FetalKickCounterFormatBean;
-import com.hphc.mystudies.bean.ParticipantPropertyBean;
-import com.hphc.mystudies.bean.QuestionnaireActivityMetaDataResponse;
-import com.hphc.mystudies.bean.QuestionnaireActivityStepsBean;
-import com.hphc.mystudies.bean.SpatialSpanMemoryFormatBean;
-import com.hphc.mystudies.bean.TowerOfHanoiFormatBean;
+import com.hphc.mystudies.bean.*;
 import com.hphc.mystudies.bean.appendix.QuestionnaireActivityStructureBean;
 import com.hphc.mystudies.dto.*;
 import com.hphc.mystudies.exception.DAOException;
@@ -53,7 +35,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
+//import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -453,7 +435,7 @@ public class ActivityMetaDataDao {
    * @author BTC
    */
   public QuestionnaireActivityMetaDataResponse studyQuestionnaireActivityMetadata(
-      String studyId, String activityId, String activityVersion, String language)
+      String studyId, String activityId, String activityVersion, String language, boolean isLive)
       throws DAOException {
     LOGGER.info("INFO: ActivityMetaDataDao - studyQuestionnaireActivityMetadata() :: Starts");
     Session session = null;
@@ -473,7 +455,7 @@ public class ActivityMetaDataDao {
                   .uniqueResult();
       if (studyDto != null) {
         activityStructureBean =
-            this.questionnaireMetadata(studyId, activityId, session, activityVersion, language);
+            this.questionnaireMetadata(studyId, activityId, session, activityVersion, language, isLive);
         activityMetaDataResponse.setActivity(activityStructureBean);
         activityMetaDataResponse.setMessage(StudyMetaDataConstants.SUCCESS);
       } else {
@@ -775,7 +757,7 @@ public class ActivityMetaDataDao {
    */
   @SuppressWarnings("unchecked")
   public QuestionnaireActivityStructureBean questionnaireMetadata(
-      String studyId, String activityId, Session session, String activityVersion, String language)
+      String studyId, String activityId, Session session, String activityVersion, String language, boolean isLive)
       throws DAOException {
     LOGGER.info("INFO: ActivityMetaDataDao - questionnaireMetadata() :: Starts");
     QuestionnaireActivityStructureBean activityStructureBean =
@@ -788,20 +770,37 @@ public class ActivityMetaDataDao {
     List<QuestionnaireActivityStepsBean> steps = new ArrayList<>();
     List<QuestionResponsetypeMasterInfoDto> questionResponseTypeMasterInfoList = null;
     try {
-      questionnaireDto =
-          (QuestionnairesDto)
-              session
-                  .createQuery(
-                      "from QuestionnairesDto QDTO"
-                          + " where QDTO.customStudyId= :customStudyId and QDTO.shortTitle= :shortTitle"
-                          + " and QDTO.status=true and QDTO.live=1 and ROUND(QDTO.version, 1)= :version ORDER BY QDTO.id DESC")
-                  .setString(StudyMetaDataEnum.QF_CUSTOM_STUDY_ID.value(), studyId)
-                  .setString(
-                      StudyMetaDataEnum.QF_SHORT_TITLE.value(),
-                      StudyMetaDataUtil.replaceSingleQuotes(activityId))
-                  .setFloat(StudyMetaDataEnum.QF_VERSION.value(), Float.parseFloat(activityVersion))
-                  .setMaxResults(1)
-                  .uniqueResult();
+      if (isLive) {
+        questionnaireDto =
+                (QuestionnairesDto)
+                        session
+                                .createQuery(
+                                        "from QuestionnairesDto QDTO"
+                                                + " where QDTO.customStudyId= :customStudyId and QDTO.shortTitle= :shortTitle"
+                                                + " and QDTO.status=true and QDTO.live=1 and ROUND(QDTO.version, 1)= :version ORDER BY QDTO.id DESC")
+                                .setParameter(StudyMetaDataEnum.QF_CUSTOM_STUDY_ID.value(), studyId)
+                                .setParameter(
+                                        StudyMetaDataEnum.QF_SHORT_TITLE.value(),
+                                        StudyMetaDataUtil.replaceSingleQuotes(activityId))
+                                .setParameter(StudyMetaDataEnum.QF_VERSION.value(), Float.parseFloat(activityVersion))
+                                .setMaxResults(1)
+                                .uniqueResult();
+      } else {
+        questionnaireDto =
+                (QuestionnairesDto)
+                        session
+                                .createQuery(
+                                        "from QuestionnairesDto QDTO"
+                                                + " where QDTO.customStudyId= :customStudyId and QDTO.shortTitle= :shortTitle"
+                                                + " and QDTO.status=true and ROUND(QDTO.version, 1)= :version ORDER BY QDTO.id DESC")
+                                .setParameter(StudyMetaDataEnum.QF_CUSTOM_STUDY_ID.value(), studyId)
+                                .setParameter(
+                                        StudyMetaDataEnum.QF_SHORT_TITLE.value(),
+                                        StudyMetaDataUtil.replaceSingleQuotes(activityId))
+                                .setParameter(StudyMetaDataEnum.QF_VERSION.value(), Float.parseFloat(activityVersion))
+                                .setMaxResults(1)
+                                .uniqueResult();
+      }
       if (questionnaireDto != null) {
         activityStructureBean.setType(StudyMetaDataConstants.ACTIVITY_QUESTIONNAIRE);
 
@@ -847,11 +846,13 @@ public class ActivityMetaDataDao {
                     + " and QSDTO.status=true ORDER BY QSDTO.sequenceNo");
         query.setInteger("id", questionnaireDto.getId());
         questionaireStepsList = query.list();
+        List<Integer> stepIds = new ArrayList<>();
         if (questionaireStepsList != null && !questionaireStepsList.isEmpty()) {
           List<Integer> instructionIdList = new ArrayList<>();
           List<Integer> questionIdList = new ArrayList<>();
           List<Integer> formIdList = new ArrayList<>();
           for (int i = 0; i < questionaireStepsList.size(); i++) {
+            stepIds.add(questionaireStepsList.get(i).getStepId());
             if (!questionnaireDto.getBranching()) {
               if ((questionaireStepsList.size() - 1) == i) {
                 questionaireStepsList.get(i).setDestinationStep(0);
@@ -863,6 +864,24 @@ public class ActivityMetaDataDao {
             }
           }
           questionaireStepsList = this.getDestinationStepType(questionaireStepsList);
+
+          List<PreLoadLogicDto> preLoadLogicDtoList = session.createQuery(
+                  "from PreLoadLogicDto where stepGroupId in (:stepId) and stepOrGroup= :step")
+                  .setParameterList("stepId", stepIds)
+                  .setParameter("step", "step")
+                  .list();
+
+          Map<Integer, List<PreLoadLogicDto>> logicDtoMap = new TreeMap<>();
+          for (Integer stepId : stepIds) {
+            List<PreLoadLogicDto> sortedList = new ArrayList<>();
+            for (PreLoadLogicDto loadLogicDto : preLoadLogicDtoList) {
+              if (stepId.equals(loadLogicDto.getStepGroupId())) {
+                sortedList.add(loadLogicDto);
+              }
+            }
+            logicDtoMap.put(stepId, sortedList);
+          }
+
           for (QuestionnairesStepsDto questionnairesStep : questionaireStepsList) {
 
             switch (questionnairesStep.getStepType()) {
@@ -929,7 +948,8 @@ public class ActivityMetaDataDao {
                           null,
                           questionaireStepsList,
                           questionnaireDto,
-                          language);
+                          language,
+                              null);
             }
           }
 
@@ -955,7 +975,8 @@ public class ActivityMetaDataDao {
                           questionResponseTypeMasterInfoList,
                           questionaireStepsList,
                           questionnaireDto,
-                          language);
+                          language,
+                              logicDtoMap);
             }
           }
 
@@ -982,7 +1003,8 @@ public class ActivityMetaDataDao {
                             questionResponseTypeMasterInfoList,
                             questionaireStepsList,
                             questionnaireDto,
-                            language);
+                            language,
+                                logicDtoMap);
               }
             }
           }
@@ -1835,7 +1857,8 @@ public class ActivityMetaDataDao {
       List<QuestionResponsetypeMasterInfoDto> questionResponseTypeMasterInfoList,
       List<QuestionnairesStepsDto> questionaireStepsList,
       QuestionnairesDto questionnaireDto,
-      String language)
+      String language,
+      Map<Integer, List<PreLoadLogicDto>> logicDtoMap)
       throws DAOException {
     LOGGER.info("INFO: ActivityMetaDataDao - getStepsInfoForQuestionnaires() :: Starts");
     TreeMap<Integer, QuestionnaireActivityStepsBean> stepsOrderSequenceTreeMap = new TreeMap<>();
@@ -1848,6 +1871,7 @@ public class ActivityMetaDataDao {
                       instructionsDtoList,
                       sequenceNoMap,
                       stepsSequenceTreeMap,
+                      session,
                       questionnaireStepDetailsMap,
                       language);
           break;
@@ -1863,7 +1887,8 @@ public class ActivityMetaDataDao {
                       questionResponseTypeMasterInfoList,
                       questionaireStepsList,
                       questionnaireDto,
-                      language);
+                      language,
+                          logicDtoMap);
           break;
         case StudyMetaDataConstants.QUESTIONAIRE_STEP_TYPE_FORM:
           stepsOrderSequenceTreeMap =
@@ -1875,7 +1900,8 @@ public class ActivityMetaDataDao {
                       stepsSequenceTreeMap,
                       questionnaireStepDetailsMap,
                       questionResponseTypeMasterInfoList,
-                      language);
+                      language,
+                          logicDtoMap);
           break;
         default:
           break;
@@ -1902,6 +1928,7 @@ public class ActivityMetaDataDao {
       List<InstructionsDto> instructionsDtoList,
       Map<String, Integer> sequenceNoMap,
       SortedMap<Integer, QuestionnaireActivityStepsBean> stepsSequenceTreeMap,
+      Session session,
       Map<String, QuestionnairesStepsDto> questionnaireStepDetailsMap,
       String language)
       throws DAOException {
@@ -1911,9 +1938,8 @@ public class ActivityMetaDataDao {
         for (InstructionsDto instructionsDto : instructionsDtoList) {
           QuestionnairesStepsDto instructionStepDetails =
               questionnaireStepDetailsMap.get(
-                  (instructionsDto.getId()
-                          + StudyMetaDataConstants.QUESTIONAIRE_STEP_TYPE_INSTRUCTION)
-                      .toString());
+                      (instructionsDto.getId()
+                              + StudyMetaDataConstants.QUESTIONAIRE_STEP_TYPE_INSTRUCTION));
           QuestionnaireActivityStepsBean instructionBean = new QuestionnaireActivityStepsBean();
 
           instructionBean.setType(
@@ -1985,12 +2011,45 @@ public class ActivityMetaDataDao {
           destinations.add(dest);
           instructionBean.setDestinations(destinations);
 
+          long count;
+          count = (long) session.createQuery("select count(*) from QuestionnairesDto where id in (" +
+                          " select questionnairesId from QuestionnairesStepsDto where destinationTrueAsGroup=:targetId) and live=:live")
+                  .setParameter("targetId", instructionStepDetails.getStepId())
+                  .setParameter("live", 1)
+                  .uniqueResult();
+          instructionBean.setHidden(count > 0);
+
+          String sourceKey = (String) session.createQuery("select stepShortTitle from QuestionnairesStepsDto where destinationTrueAsGroup=:destId")
+                  .setParameter("destId", instructionStepDetails.getStepId())
+                  .setMaxResults(1)
+                  .uniqueResult();
+
+          instructionBean.setSourceQuestionKey(sourceKey != null ? sourceKey : "");
+
+          PipingBean pipingBean = new PipingBean();
+          pipingBean.setPipingSnippet(instructionStepDetails.getPipingSnippet());
+          Integer pipingSrc = instructionStepDetails.getPipingSourceQuestionKey();
+          if (pipingSrc != null) {
+            QuestionnairesStepsDto stepsDto = session.get(QuestionnairesStepsDto.class, pipingSrc);
+            if (stepsDto != null) {
+              pipingBean.setSourceQuestionKey(stepsDto.getStepShortTitle());
+              if (instructionStepDetails.getDifferentSurvey() != null && instructionStepDetails.getDifferentSurvey()) {
+                QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class, stepsDto.getQuestionnairesId());
+                if (questionnairesDto != null) {
+                  pipingBean.setActivityId(questionnairesDto.getShortTitle());
+                  pipingBean.setActivityVersion(questionnairesDto.getVersion() != null ? String.valueOf(questionnairesDto.getVersion()) : "");
+                }
+              }
+            }
+          }
+          instructionBean.setPipingLogic(pipingBean);
+          instructionBean.setPiping(instructionStepDetails.getIsPiping());
+
           stepsSequenceTreeMap.put(
-              sequenceNoMap.get(
-                  (instructionsDto.getId()
-                          + StudyMetaDataConstants.QUESTIONAIRE_STEP_TYPE_INSTRUCTION)
-                      .toString()),
-              instructionBean);
+                  sequenceNoMap.get(
+                          (instructionsDto.getId()
+                                  + StudyMetaDataConstants.QUESTIONAIRE_STEP_TYPE_INSTRUCTION)),
+                  instructionBean);
         }
       }
     } catch (Exception e) {
@@ -2025,7 +2084,8 @@ public class ActivityMetaDataDao {
       List<QuestionResponsetypeMasterInfoDto> questionResponseTypeMasterInfoList,
       List<QuestionnairesStepsDto> questionaireStepsList,
       QuestionnairesDto questionnaireDto,
-      String language)
+      String language,
+      Map<Integer, List<PreLoadLogicDto>> logicDtoMap)
       throws DAOException {
     LOGGER.info("INFO: ActivityMetaDataDao - getQuestionDetailsForQuestionnaire() :: Starts");
     List<QuestionResponseSubTypeDto> destinationConditionList = null;
@@ -2289,11 +2349,133 @@ public class ActivityMetaDataDao {
               && StringUtils.isNotEmpty(questionsDto.getHealthkitDatatype())) {
             questionBean.setHealthDataKey(questionsDto.getHealthkitDatatype().trim());
           }
+
+          // setting survey data
+          questionBean.setDefaultVisibility(questionStepDetails.getDefaultVisibility());
+          if (questionStepDetails.getDefaultVisibility() != null && !questionStepDetails.getDefaultVisibility()) {
+            questionBean.setSkippable(false);
+          }
+
+          long count = 0;
+          count = (long) session.createQuery("select count(*) from QuestionnairesDto where id in (" +
+                  " select questionnairesId from QuestionnairesStepsDto where destinationTrueAsGroup=:targetId) and live=:live")
+                  .setParameter("targetId", questionStepDetails.getStepId())
+                  .setParameter("live", 1)
+                  .uniqueResult();
+          questionBean.setHidden(count > 0);
+          List<PreLoadLogicDto> preLoadLogicDtoList = logicDtoMap.get(questionStepDetails.getStepId());
+          PreLoadLogicBean preLoadLogicBean = new PreLoadLogicBean();
+          StringBuilder value = new StringBuilder();
+          StringBuilder operator = new StringBuilder();
+          String delimiter = ":";
+          int index = preLoadLogicDtoList.size() - 1;
+          int i = 0;
+          for (PreLoadLogicDto preLoadLogicDto : preLoadLogicDtoList) {
+            if (StringUtils.isNotBlank(preLoadLogicDto.getInputValue())) {
+              if (i == index) {
+                value.append(preLoadLogicDto.getInputValue());
+              } else {
+                value.append(preLoadLogicDto.getInputValue()).append(delimiter);
+              }
+            }
+            if (StringUtils.isNotBlank(preLoadLogicDto.getConditionOperator())) {
+                operator.append(preLoadLogicDto.getConditionOperator()).append(delimiter);
+            }
+            if (StringUtils.isNotBlank(preLoadLogicDto.getOperator())) {
+              if (i == index) {
+                operator.append(preLoadLogicDto.getOperator());
+              }
+              else {
+                operator.append(preLoadLogicDto.getOperator()).append(delimiter);
+              }
+            }
+            i++;
+          }
+          Integer trueDest = questionStepDetails.getDestinationTrueAsGroup();
+          if (trueDest != null) {
+            if (trueDest == 0) {
+              preLoadLogicBean.setDestinationStepKey("0");
+              if (questionStepDetails.getDifferentSurveyPreLoad() != null && questionStepDetails.getDifferentSurveyPreLoad()) {
+                QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class, questionStepDetails.getPreLoadSurveyId());
+                if (questionnairesDto != null) {
+                  preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
+                  preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+                }
+              }
+            } else {
+              if ("group".equals(questionStepDetails.getStepOrGroup())) {
+                GroupsDto groupsDto = session.get(GroupsDto.class, trueDest);
+                if (groupsDto != null) {
+                  List<String> questionIds = session.createQuery("select questionnaireStepId from GroupMappingDto where grpId=:groupId")
+                          .setParameter("groupId", trueDest)
+                          .list();
+                  if (questionIds != null && !questionIds.isEmpty()) {
+                    List<QuestionnairesStepsDto> stepsDtoList = session.createQuery(
+                                    "from QuestionnairesStepsDto where stepId in (:stepIdList) order by sequenceNo")
+                            .setParameterList("stepIdList", questionIds).list();
+                    if (stepsDtoList != null && !stepsDtoList.isEmpty()) {
+                      QuestionnairesStepsDto stepsDto = stepsDtoList.get(0);
+                      preLoadLogicBean.setDestinationStepKey(stepsDto.getStepShortTitle());
+                      if (questionStepDetails.getDifferentSurveyPreLoad() != null && questionStepDetails.getDifferentSurveyPreLoad()) {
+                        QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
+                                stepsDto.getQuestionnairesId());
+                        if (questionnairesDto != null) {
+                          preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
+                          preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+                        }
+                      }
+                    }
+                  }
+                }
+              } else {
+                QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class, trueDest);
+                if (questionnairesStepsDto != null) {
+                  preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
+                  // if different survey question then do below logic
+                  if (questionStepDetails.getDifferentSurveyPreLoad() != null && questionStepDetails.getDifferentSurveyPreLoad()) {
+                    QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
+                            questionnairesStepsDto.getQuestionnairesId());
+                    if (questionnairesDto != null) {
+                      preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
+                      preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          String sourceKey = (String) session.createQuery("select stepShortTitle from QuestionnairesStepsDto where destinationTrueAsGroup=:destId")
+                  .setParameter("destId", questionStepDetails.getStepId())
+                  .setMaxResults(1)
+                  .uniqueResult();
+          questionBean.setSourceQuestionKey(sourceKey != null ? sourceKey : "");
+          preLoadLogicBean.setValue(value.toString());
+          preLoadLogicBean.setOperator(operator.toString());
+          questionBean.setPreLoadLogic(preLoadLogicBean);
+          PipingBean pipingBean = new PipingBean();
+          pipingBean.setPipingSnippet(questionStepDetails.getPipingSnippet());
+          Integer pipingSrc = questionStepDetails.getPipingSourceQuestionKey();
+          if (pipingSrc != null) {
+            QuestionnairesStepsDto stepsDto = session.get(QuestionnairesStepsDto.class, pipingSrc);
+            if (stepsDto != null) {
+              pipingBean.setSourceQuestionKey(stepsDto.getStepShortTitle());
+              if (questionStepDetails.getDifferentSurvey() != null && questionStepDetails.getDifferentSurvey()) {
+                QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class, stepsDto.getQuestionnairesId());
+                if (questionnairesDto != null) {
+                  pipingBean.setActivityId(questionnairesDto.getShortTitle());
+                  pipingBean.setActivityVersion(questionnairesDto.getVersion() != null ? String.valueOf(questionnairesDto.getVersion()) : "");
+                }
+              }
+            }
+          }
+          questionBean.setPipingLogic(pipingBean);
+          questionBean.setPiping(questionStepDetails.getIsPiping());
+
           stepsSequenceTreeMap.put(
-              sequenceNoMap.get(
-                  (questionsDto.getId() + StudyMetaDataConstants.QUESTIONAIRE_STEP_TYPE_QUESTION)
-                      .toString()),
-              questionBean);
+                  sequenceNoMap.get(
+                          (questionsDto.getId() + StudyMetaDataConstants.QUESTIONAIRE_STEP_TYPE_QUESTION)),
+                  questionBean);
         }
       }
     } catch (Exception e) {
@@ -2327,7 +2509,8 @@ public class ActivityMetaDataDao {
       SortedMap<Integer, QuestionnaireActivityStepsBean> stepsSequenceTreeMap,
       Map<String, QuestionnairesStepsDto> questionnaireStepDetailsMap,
       List<QuestionResponsetypeMasterInfoDto> questionResponseTypeMasterInfoList,
-      String language)
+      String language,
+      Map<Integer, List<PreLoadLogicDto>> logicDtoMap)
       throws DAOException {
     LOGGER.info("INFO: ActivityMetaDataDao - getFormDetailsForQuestionnaire() :: Starts");
     try {
@@ -2480,16 +2663,130 @@ public class ActivityMetaDataDao {
             }
           }
 
+          int size = formQuestionMap.size();
+          int i = 1;
           for (Integer key : formQuestionMap.keySet()) {
-            formSteps.add(formStepsMap.get(formQuestionMap.get(key)));
+            QuestionnaireActivityStepsBean stepsBean = formStepsMap.get(formQuestionMap.get(key));
+            // if last question
+            if (i == size) {
+              List<PreLoadLogicDto> preLoadLogicDtoList = logicDtoMap.get(formStepDetails.getStepId());
+              PreLoadLogicBean preLoadLogicBean = new PreLoadLogicBean();
+              StringBuilder value = new StringBuilder();
+              StringBuilder operator = new StringBuilder();
+              String delimiter = ":";
+              int index = preLoadLogicDtoList.size();
+              int j = 1;
+              for (PreLoadLogicDto preLoadLogicDto : preLoadLogicDtoList) {
+                if (StringUtils.isNotBlank(preLoadLogicDto.getInputValue())) {
+                  if (j == index) {
+                    value.append(preLoadLogicDto.getInputValue());
+                  } else {
+                    value.append(preLoadLogicDto.getInputValue()).append(delimiter);
+                  }
+                }
+                if (StringUtils.isNotBlank(preLoadLogicDto.getConditionOperator())) {
+                  operator.append(preLoadLogicDto.getConditionOperator()).append(delimiter);
+                }
+                if (StringUtils.isNotBlank(preLoadLogicDto.getOperator())) {
+                  if (j == index) {
+                    operator.append(preLoadLogicDto.getOperator());
+                  }
+                  else {
+                    operator.append(preLoadLogicDto.getOperator()).append(delimiter);
+                  }
+                }
+                j++;
+              }
+
+              Integer trueDest = formStepDetails.getDestinationTrueAsGroup();
+              if (trueDest != null) {
+                if (trueDest == 0) {
+                  preLoadLogicBean.setDestinationStepKey("0");
+                  if (formStepDetails.getDifferentSurveyPreLoad() != null && formStepDetails.getDifferentSurveyPreLoad()) {
+                    QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class, formStepDetails.getPreLoadSurveyId());
+                    if (questionnairesDto != null) {
+                      preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
+                      preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+                    }
+                  }
+                } else {
+                  if ("group".equals(formStepDetails.getStepOrGroup())) {
+                    GroupsDto groupsDto = session.get(GroupsDto.class, trueDest);
+                    if (groupsDto != null) {
+                      List<String> stepIds = session.createQuery("select questionnaireStepId from GroupMappingDto where grpId=:groupId")
+                              .setParameter("groupId", trueDest)
+                              .list();
+                      if (stepIds != null && !stepIds.isEmpty()) {
+                        List<QuestionnairesStepsDto> stepsDtoList = session.createQuery(
+                                        "from QuestionnairesStepsDto where stepId in (:stepIdList) order by sequenceNo")
+                                .setParameterList("stepIdList", stepIds).list();
+                        if (stepsDtoList != null && !stepsDtoList.isEmpty()) {
+                          QuestionnairesStepsDto stepsDto = stepsDtoList.get(0);
+                          preLoadLogicBean.setDestinationStepKey(stepsDto.getStepShortTitle());
+                          if (formStepDetails.getDifferentSurveyPreLoad() != null && formStepDetails.getDifferentSurveyPreLoad()) {
+                            QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
+                                    stepsDto.getQuestionnairesId());
+                            if (questionnairesDto != null) {
+                              preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
+                              preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+                            }
+                          }
+                        }
+                      }
+                    }
+                  } else {
+                    QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class, trueDest);
+                    if (questionnairesStepsDto != null) {
+                      preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
+                      if (formStepDetails.getDifferentSurveyPreLoad() != null && formStepDetails.getDifferentSurveyPreLoad()) {
+                        QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
+                                questionnairesStepsDto.getQuestionnairesId());
+                        if (questionnairesDto != null) {
+                          preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
+                          preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+
+              preLoadLogicBean.setValue(value.toString());
+              preLoadLogicBean.setOperator(operator.toString());
+              stepsBean.setDefaultVisibility(formStepDetails.getDefaultVisibility());
+              stepsBean.setPreLoadLogic(preLoadLogicBean);
+            }
+            i++;
+            formSteps.add(stepsBean);
           }
           formBean.setSteps(formSteps);
 
+          // setting survey data
+          if (formStepDetails.getDefaultVisibility() != null && !formStepDetails.getDefaultVisibility()) {
+            formBean.setSkippable(false);
+          }
+
+          String sourceKey = (String) session.createQuery("select stepShortTitle from QuestionnairesStepsDto where destinationTrueAsGroup=:destId")
+                  .setParameter("destId", formStepDetails.getStepId())
+                  .setMaxResults(1)
+                  .uniqueResult();
+          formBean.setSourceQuestionKey(sourceKey != null ? sourceKey : "");
+
+          long count = 0;
+          count = (long) session.createQuery("select count(*) from QuestionnairesDto where id in (" +
+                          " select questionnairesId from QuestionnairesStepsDto where destinationTrueAsGroup=:targetId) and live=:live")
+                  .setParameter("targetId", formStepDetails.getStepId())
+                  .setParameter("live", 1)
+                  .uniqueResult();
+          formBean.setHidden(count > 0);
+
+          formBean.setPipingLogic(new PipingBean());
+          formBean.setPiping(false);
+
           stepsSequenceTreeMap.put(
               sequenceNoMap.get(
-                  (formsList.get(0).getFormId()
-                          + StudyMetaDataConstants.QUESTIONAIRE_STEP_TYPE_FORM)
-                      .toString()),
+                      (formsList.get(0).getFormId()
+                              + StudyMetaDataConstants.QUESTIONAIRE_STEP_TYPE_FORM)),
               formBean);
         }
       }
@@ -4017,7 +4314,7 @@ public class ActivityMetaDataDao {
         imageBytes = IOUtils.toByteArray(new URL(imagePath));
       }
 
-      base64Image = Base64.getEncoder().encodeToString(imageBytes);
+      base64Image = null;
     } catch (Exception e) {
       LOGGER.error("ActivityMetaDataDao - getBase64Image() :: ERROR", e);
     }
@@ -5337,16 +5634,15 @@ public class ActivityMetaDataDao {
   public InstructionsLangBO getInstructionLangBo(int instructionId, String language) {
     LOGGER.info("ActivityMetaDataDao - getInstructionLangBo - Starts");
     InstructionsLangBO instructionsLangBO = null;
-    try {
-      Session session = sessionFactory.openSession();
+    try (Session session = sessionFactory.openSession()) {
       instructionsLangBO =
-          (InstructionsLangBO)
-              session
-                  .createQuery(
-                      "from InstructionsLangBO ILB where ILB.instructionLangPK.langCode=:language and ILB.instructionLangPK.id=:id")
-                  .setString("language", language)
-                  .setInteger("id", instructionId)
-                  .uniqueResult();
+              (InstructionsLangBO)
+                      session
+                              .createQuery(
+                                      "from InstructionsLangBO ILB where ILB.instructionLangPK.langCode=:language and ILB.instructionLangPK.id=:id")
+                              .setString("language", language)
+                              .setInteger("id", instructionId)
+                              .uniqueResult();
     } catch (Exception e) {
       LOGGER.error("ActivityMetaDataDao - getInstructionLangBo - Error : ", e);
     }
@@ -5357,16 +5653,15 @@ public class ActivityMetaDataDao {
   public FormLangBO getFormLangBo(int formId, String language) {
     LOGGER.info("ActivityMetaDataDao - getFormLangBo - Starts");
     FormLangBO formLangBO = null;
-    try {
-      Session session = sessionFactory.openSession();
+    try (Session session = sessionFactory.openSession()) {
       formLangBO =
-          (FormLangBO)
-              session
-                  .createQuery(
-                      "from FormLangBO FLB where FLB.formLangPK.langCode=:language and FLB.formLangPK.formId=:id")
-                  .setString("language", language)
-                  .setInteger("id", formId)
-                  .uniqueResult();
+              (FormLangBO)
+                      session
+                              .createQuery(
+                                      "from FormLangBO FLB where FLB.formLangPK.langCode=:language and FLB.formLangPK.formId=:id")
+                              .setString("language", language)
+                              .setInteger("id", formId)
+                              .uniqueResult();
     } catch (Exception e) {
       LOGGER.error("ActivityMetaDataDao - getFormLangBo - Error : ", e);
     }
@@ -5377,16 +5672,15 @@ public class ActivityMetaDataDao {
   public QuestionLangBO getQuestionLangBo(int id, String language) {
     LOGGER.info("ActivityMetaDataDao - getQuestionLangBo - Starts");
     QuestionLangBO questionLangBO = null;
-    try {
-      Session session = sessionFactory.openSession();
+    try (Session session = sessionFactory.openSession()) {
       questionLangBO =
-          (QuestionLangBO)
-              session
-                  .createQuery(
-                      "from QuestionLangBO QLB where QLB.questionLangPK.langCode=:language and QLB.questionLangPK.id=:id")
-                  .setString("language", language)
-                  .setInteger("id", id)
-                  .uniqueResult();
+              (QuestionLangBO)
+                      session
+                              .createQuery(
+                                      "from QuestionLangBO QLB where QLB.questionLangPK.langCode=:language and QLB.questionLangPK.id=:id")
+                              .setString("language", language)
+                              .setInteger("id", id)
+                              .uniqueResult();
     } catch (Exception e) {
       LOGGER.error("ActivityMetaDataDao - getQuestionLangBo - Error : ", e);
     }

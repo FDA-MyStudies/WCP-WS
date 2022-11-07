@@ -108,7 +108,7 @@ public class ActivityMetaDataOrchestration {
    * @author BTC
    */
   public QuestionnaireActivityMetaDataResponse studyQuestionnaireActivityMetadata(
-      String studyId, String activityId, String activityVersion, String language)
+      String studyId, String activityId, String activityVersion, String language, boolean isLive)
       throws OrchestrationException {
     LOGGER.info(
         "INFO: ActivityMetaDataOrchestration - studyQuestionnaireActivityMetadata() :: Starts");
@@ -117,7 +117,7 @@ public class ActivityMetaDataOrchestration {
     try {
       questionnaireActivityMetaDataResponse =
           activityMetaDataDao.studyQuestionnaireActivityMetadata(
-              studyId, activityId, activityVersion, language);
+              studyId, activityId, activityVersion, language, isLive);
     } catch (Exception e) {
       LOGGER.error(
           "ActivityMetaDataOrchestration - studyQuestionnaireActivityMetadata() :: ERROR", e);
