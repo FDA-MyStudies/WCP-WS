@@ -2079,6 +2079,7 @@ public class ActivityMetaDataDao {
                               .setParameter("group", "group")
                               .setMaxResults(1)
                               .uniqueResult();
+                      instructionBean.setHidden(sourceKey != null);
                     }
                   }
                 }
@@ -2101,6 +2102,7 @@ public class ActivityMetaDataDao {
                       QuestionnairesStepsDto stepsDto = stepsDtoList.get(0);
                       if (stepsDto != null) {
                         sourceKey = stepsDto.getStepShortTitle();
+                        instructionBean.setHidden(sourceKey != null);
                       }
                     }
                   }
@@ -2520,7 +2522,6 @@ public class ActivityMetaDataDao {
                           QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class, groupDest);
                           if (questionnairesStepsDto != null) {
                             preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
-                            questionBean.setHidden(true);
                             questionBean.setDefaultVisibility(false);
                             preLoadLogicDtoList = logicDtoMap.get(groupsDto.getId() + "_group");
                           }
@@ -2560,6 +2561,7 @@ public class ActivityMetaDataDao {
                               .setParameter("group", "group")
                               .setMaxResults(1)
                               .uniqueResult();
+                      questionBean.setHidden(sourceKey != null);
                     }
                   }
                 }
@@ -2582,6 +2584,7 @@ public class ActivityMetaDataDao {
                       QuestionnairesStepsDto stepsDto = stepsDtoList.get(0);
                       if (stepsDto != null) {
                         sourceKey = stepsDto.getStepShortTitle();
+                        questionBean.setHidden(sourceKey != null);
                       }
                     }
                   }
@@ -2998,6 +3001,7 @@ public class ActivityMetaDataDao {
                               .setParameter("group", "group")
                               .setMaxResults(1)
                               .uniqueResult();
+                      formBean.setHidden(sourceKey != null);
                     }
                   }
                 }
@@ -3020,6 +3024,7 @@ public class ActivityMetaDataDao {
                       QuestionnairesStepsDto stepsDto = stepsDtoList.get(0);
                       if (stepsDto != null) {
                         sourceKey = stepsDto.getStepShortTitle();
+                        formBean.setHidden(sourceKey != null);
                       }
                     }
                   }
