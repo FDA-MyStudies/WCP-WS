@@ -2438,9 +2438,6 @@ public class ActivityMetaDataDao {
 
           // setting survey data
           questionBean.setDefaultVisibility(questionStepDetails.getDefaultVisibility());
-          if (questionStepDetails.getDefaultVisibility() != null && !questionStepDetails.getDefaultVisibility()) {
-            questionBean.setSkippable(false);
-          }
 
           long count = 0;
           count = (long) session.createQuery("select count(*) from QuestionnairesDto where id in (" +
@@ -2523,6 +2520,7 @@ public class ActivityMetaDataDao {
                           QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class, groupDest);
                           if (questionnairesStepsDto != null) {
                             preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
+                            questionBean.setHidden(true);
                             questionBean.setDefaultVisibility(false);
                             preLoadLogicDtoList = logicDtoMap.get(groupsDto.getId() + "_group");
                           }
@@ -2533,6 +2531,10 @@ public class ActivityMetaDataDao {
                 }
               }
             }
+          }
+
+          if (questionBean.getDefaultVisibility() != null && !questionBean.getDefaultVisibility()) {
+            questionBean.setSkippable(false);
           }
 
           String sourceKey = (String) session.createQuery("select stepShortTitle from QuestionnairesStepsDto where destinationTrueAsGroup=:destId")
@@ -2913,6 +2915,7 @@ public class ActivityMetaDataDao {
                               QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class, groupDest);
                               if (questionnairesStepsDto != null) {
                                 preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
+                                formBean.setHidden(true);
                                 formBean.setDefaultVisibility(false);
                                 preLoadLogicDtoList = logicDtoMap.get(groupsDto.getId() + "_group");
                               }
