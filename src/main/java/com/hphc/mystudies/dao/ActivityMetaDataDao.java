@@ -4874,10 +4874,7 @@ public class ActivityMetaDataDao {
           tempFormula =
               conditionFormula.replaceAll(
                   "x", valueOfX >= 0 ? valueOfX.toString() : "(" + valueOfX + ")");
-
-          if (engine != null) {
-            flag = (boolean) engine.eval(tempFormula);
-          }
+          flag = (boolean) engine.eval(tempFormula);
 
           if (LHS.contains("x") && !RHS.contains("x")) {
             switch (operator) {
@@ -5265,19 +5262,16 @@ public class ActivityMetaDataDao {
                       stringFormat,
                       Double.parseDouble(destinationsList.get(1).getCondition()) * 60));
         } else {
-          String condition0 = destinationsList.get(0).getCondition();
           destinationsList
-              .get(0)
-              .setCondition(StringUtils.isNumeric(condition0)
-                      ? String.format(stringFormat, Double.parseDouble(condition0))
-                      : condition0);
-
-          String condition1 = destinationsList.get(1).getCondition();
+                  .get(0)
+                  .setCondition(
+                          String.format(
+                                  stringFormat, Double.parseDouble(destinationsList.get(0).getCondition())));
           destinationsList
-              .get(1)
-              .setCondition(StringUtils.isNumeric(condition1)
-                      ? String.format(stringFormat, Double.parseDouble(condition1))
-                      : condition1);
+                  .get(1)
+                  .setCondition(
+                          String.format(
+                                  stringFormat, Double.parseDouble(destinationsList.get(1).getCondition())));
         }
       }
     } catch (Exception e) {
