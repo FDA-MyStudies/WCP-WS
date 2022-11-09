@@ -2523,6 +2523,7 @@ public class ActivityMetaDataDao {
                           QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class, groupDest);
                           if (questionnairesStepsDto != null) {
                             preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
+                            questionBean.setDefaultVisibility(false);
                             preLoadLogicDtoList = logicDtoMap.get(groupsDto.getId() + "_group");
                           }
                         }
@@ -2912,6 +2913,7 @@ public class ActivityMetaDataDao {
                               QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class, groupDest);
                               if (questionnairesStepsDto != null) {
                                 preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
+                                formBean.setDefaultVisibility(false);
                                 preLoadLogicDtoList = logicDtoMap.get(groupsDto.getId() + "_group");
                               }
                             }
