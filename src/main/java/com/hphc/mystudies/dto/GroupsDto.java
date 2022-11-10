@@ -60,6 +60,9 @@ public class GroupsDto implements Serializable {
     @Column(name = "default_visibility")
     private Boolean defaultVisibility;
 
+    @Column(name = "step_or_group")
+    private String stepOrGroup;
+
     public Integer getId() {
         return id;
     }
@@ -194,5 +197,13 @@ public class GroupsDto implements Serializable {
 
     public void setDefaultVisibility(Boolean defaultVisibility) {
         this.defaultVisibility = defaultVisibility;
+    }
+
+    public String getStepOrGroup() {
+        return stepOrGroup;
+    }
+
+    public void setStepOrGroup(String stepOrGroup) {
+        this.stepOrGroup = stepOrGroup;
     }
 }
