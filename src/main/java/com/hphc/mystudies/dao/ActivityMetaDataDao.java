@@ -2513,6 +2513,7 @@ public class ActivityMetaDataDao {
                       if (groupDest != null) {
                         if (groupDest == 0) {
                           preLoadLogicBean.setDestinationStepKey("0");
+                          preLoadLogicDtoList = logicDtoMap.get(groupsDto.getId() + "_group");
                         } else if (StudyMetaDataConstants.GROUP.equals(groupsDto.getStepOrGroup())) {
                           List<Integer> steps = session.createQuery("select questionnaireStepId from GroupMappingDto where grpId=:grpId")
                                   .setParameter("grpId", groupsDto.getDestinationTrueAsGroup()).list();
@@ -2949,6 +2950,7 @@ public class ActivityMetaDataDao {
                           if (groupDest != null) {
                             if (groupDest == 0) {
                               preLoadLogicBean.setDestinationStepKey("0");
+                              preLoadLogicDtoList = logicDtoMap.get(groupsDto.getId() + "_group");
                             } else if (StudyMetaDataConstants.GROUP.equals(groupsDto.getStepOrGroup())) {
                               List<Integer> steps = session.createQuery("select questionnaireStepId from GroupMappingDto where grpId=:grpId")
                                       .setParameter("grpId", groupsDto.getDestinationTrueAsGroup()).list();
