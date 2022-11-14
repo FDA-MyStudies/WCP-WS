@@ -2553,12 +2553,36 @@ public class ActivityMetaDataDao {
                   .setParameter("destId", questionStepDetails.getStepId())
                   .setMaxResults(1)
                   .uniqueResult();
+
+          // sets the source key for first question of a current group
+          if (StringUtils.isBlank(sourceKey)) {
+            // group as destination
+            if (groupsDtoList != null) {
+              for (GroupsDto groupsDto : groupsDtoList) {
+                Integer firstStep = this.getFirstStepOfGroup(session, groupsDto.getId());
+                if (firstStep.equals(questionStepDetails.getStepId())) {
+                  sourceKey = (String) session.createQuery("select stepShortTitle from QuestionnairesStepsDto where destinationTrueAsGroup=:grpId" +
+                                  " and stepOrGroup=:group")
+                          .setParameter("grpId", groupsDto.getId())
+                          .setParameter(StudyMetaDataConstants.GROUP, StudyMetaDataConstants.GROUP)
+                          .setMaxResults(1)
+                          .uniqueResult();
+                  questionBean.setHidden(sourceKey != null);
+                  if (StringUtils.isNotBlank(sourceKey)) {
+                    break;
+                  }
+                }
+              }
+            }
+          }
+
           if (StringUtils.isBlank(sourceKey)) {
             // group as destination
             if (groupsDtoList != null) {
               for (GroupsDto groupsDto : groupsDtoList) {
                 int groupId = groupsDto.getId();
                 if (StudyMetaDataConstants.GROUP.equals(groupsDto.getStepOrGroup())) {
+//                  sets the source key for first step of destination group if group -> group
                   GroupsDto destGroup = session.get(GroupsDto.class, groupsDto.getDestinationTrueAsGroup());
                   groupId = destGroup.getId();
                 }
