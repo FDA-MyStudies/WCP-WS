@@ -4881,7 +4881,7 @@ public class ActivityMetaDataDao {
       throws DAOException {
     LOGGER.info("INFO: ActivityMetaDataDao - getConditionalBranchingDestinations() :: Starts");
     ScriptEngineManager mgr = new ScriptEngineManager();
-    ScriptEngine engine = mgr.getEngineByName("JavaScript");
+    ScriptEngine engine = mgr.getEngineByName("nashorn");
 
     String conditionFormula = "";
     String operator = "";
