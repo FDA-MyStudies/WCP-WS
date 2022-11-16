@@ -882,8 +882,7 @@ public class ActivityMetaDataDao {
             logicDtoMap.put(stepId + "_step", sortedList);
           }
 
-          List<GroupsDto> groupsDtoList = session.createQuery("from GroupsDto where studyId=:studyId and questionnaireId=:queId " +
-                          "and defaultVisibility=false and destinationTrueAsGroup is not null")
+          List<GroupsDto> groupsDtoList = session.createQuery("from GroupsDto where studyId=:studyId and questionnaireId=:queId")
                   .setParameter("studyId", questionnaireDto.getStudyId())
                   .setParameter("queId", questionnaireDto.getId()).list();
 
@@ -2539,6 +2538,7 @@ public class ActivityMetaDataDao {
                     QuestionnairesStepsDto stepsDto = stepsDtoList.get(0);
                     if (questionStepDetails.getStepId().equals(stepsDto.getStepId())) {
                       Integer groupDest = groupsDto.getDestinationTrueAsGroup();
+                      questionBean.setSkippable(false);
                       if (groupDest != null) {
                         if (groupDest == 0) {
                           preLoadLogicBean.setDestinationStepKey("0");
@@ -3012,6 +3012,7 @@ public class ActivityMetaDataDao {
                       if (stepsDtoList != null && !stepsDtoList.isEmpty()) {
                         // last question of a particular group
                         QuestionnairesStepsDto stepsDto = stepsDtoList.get(0);
+                        formBean.setSkippable(false);
                         if (formStepDetails.getStepId().equals(stepsDto.getStepId())) {
                           Integer groupDest = groupsDto.getDestinationTrueAsGroup();
                           if (groupDest != null) {
