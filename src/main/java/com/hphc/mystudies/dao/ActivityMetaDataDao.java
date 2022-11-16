@@ -2037,13 +2037,27 @@ public class ActivityMetaDataDao {
                   : instructionStepDetails.getRepeatableText());
 
           List<DestinationBean> destinations = new ArrayList<>();
+
           DestinationBean dest = new DestinationBean();
-          dest.setCondition("");
-          dest.setDestination(
-              (instructionStepDetails.getDestinationStepType() == null
-                      || instructionStepDetails.getDestinationStepType().isEmpty())
-                  ? ""
-                  : instructionStepDetails.getDestinationStepType());
+          if (StudyMetaDataConstants.GROUP.equals(instructionStepDetails.getStepOrGroupPostLoad())) {
+            Integer groupId = instructionStepDetails.getDestinationStep();
+            if (groupId != null) {
+              Integer stepId = this.getFirstStepOfGroup(session, groupId);
+              if (stepId != null) {
+                QuestionnairesStepsDto stepsDto = session.get(QuestionnairesStepsDto.class, stepId);
+                if (stepsDto != null) {
+                  dest.setDestination(stepsDto.getStepShortTitle());
+                }
+              }
+            }
+          } else {
+            dest.setCondition("");
+            dest.setDestination(
+                    (instructionStepDetails.getDestinationStepType() == null
+                            || instructionStepDetails.getDestinationStepType().isEmpty())
+                            ? ""
+                            : instructionStepDetails.getDestinationStepType());
+          }
           destinations.add(dest);
           instructionBean.setDestinations(destinations);
 
@@ -2361,14 +2375,29 @@ public class ActivityMetaDataDao {
             }
           }
 
-          DestinationBean destination = new DestinationBean();
-          destination.setCondition("");
-          destination.setDestination(
-              (questionStepDetails.getDestinationStepType() == null
-                      || questionStepDetails.getDestinationStepType().isEmpty())
-                  ? ""
-                  : questionStepDetails.getDestinationStepType());
-          destinationsList.add(destination);
+          if (StudyMetaDataConstants.GROUP.equals(questionStepDetails.getStepOrGroupPostLoad())) {
+            DestinationBean destinationBean = new DestinationBean();
+            Integer groupId = questionStepDetails.getDestinationStep();
+            if (groupId != null) {
+              Integer stepId = this.getFirstStepOfGroup(session, groupId);
+              if (stepId != null) {
+                QuestionnairesStepsDto stepsDto = session.get(QuestionnairesStepsDto.class, stepId);
+                if (stepsDto != null) {
+                  destinationBean.setDestination(stepsDto.getStepShortTitle());
+                  destinationsList.add(destinationBean);
+                }
+              }
+            }
+          } else {
+            DestinationBean destination = new DestinationBean();
+            destination.setCondition("");
+            destination.setDestination(
+                    (questionStepDetails.getDestinationStepType() == null
+                            || questionStepDetails.getDestinationStepType().isEmpty())
+                            ? ""
+                            : questionStepDetails.getDestinationStepType());
+            destinationsList.add(destination);
+          }
 
           // other type add destination if there start
           QuestionReponseTypeDto otherReponseSubType =
@@ -2805,12 +2834,26 @@ public class ActivityMetaDataDao {
 
           List<DestinationBean> destinations = new ArrayList<>();
           DestinationBean dest = new DestinationBean();
-          dest.setCondition("");
-          dest.setDestination(
-              (formStepDetails.getDestinationStepType() == null
-                      || formStepDetails.getDestinationStepType().isEmpty())
-                  ? ""
-                  : formStepDetails.getDestinationStepType());
+
+          if (StudyMetaDataConstants.GROUP.equals(formStepDetails.getStepOrGroupPostLoad())) {
+            Integer groupId = formStepDetails.getDestinationStep();
+            if (groupId != null) {
+              Integer stepId = this.getFirstStepOfGroup(session, groupId);
+              if (stepId != null) {
+                QuestionnairesStepsDto stepsDto = session.get(QuestionnairesStepsDto.class, stepId);
+                if (stepsDto != null) {
+                  dest.setDestination(stepsDto.getStepShortTitle());
+                }
+              }
+            }
+          } else {
+            dest.setCondition("");
+            dest.setDestination(
+                    (formStepDetails.getDestinationStepType() == null
+                            || formStepDetails.getDestinationStepType().isEmpty())
+                            ? ""
+                            : formStepDetails.getDestinationStepType());
+          }
           destinations.add(dest);
           formBean.setDestinations(destinations);
 
