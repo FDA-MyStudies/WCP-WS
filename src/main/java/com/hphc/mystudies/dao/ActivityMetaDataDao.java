@@ -2120,23 +2120,30 @@ public class ActivityMetaDataDao {
                 ArrayList<QuestionnairesStepsDto> stepsDtoList = (ArrayList<QuestionnairesStepsDto>) session.createQuery("from QuestionnairesStepsDto  where stepId in :stepIds order by sequenceNo desc")
                         .setParameterList("stepIds", stepIdList).list();
                 if (stepsDtoList != null && !stepsDtoList.isEmpty()) {
-                  ArrayList<QuestionnairesStepsDto> stepsDtoListAsc = (ArrayList<QuestionnairesStepsDto>) stepsDtoList.clone();
-                  Collections.sort(stepsDtoListAsc, new Comparator<QuestionnairesStepsDto>(){
-                    public int compare(QuestionnairesStepsDto o1, QuestionnairesStepsDto o2){
-                      return o1.getSequenceNo() - o2.getSequenceNo();
-                    }
-                  });
-                  int i = 0;
-                  for (QuestionnairesStepsDto stepsDto : stepsDtoListAsc) {
-                    if (stepsDto.getStepId().equals(instructionStepDetails.getStepId())) {
-                      instructionBean.setDefaultVisibility(false);
-                      instructionBean.setHidden(true);
-                      instructionBean.setGroupId(groupsDto.getGroupId());
-                      if (stepsDtoListAsc.size() > (i + 1)) {
-                        preLoadLogicBean.setDestinationStepKey(stepsDtoListAsc.get(i + 1).getStepShortTitle());
+                  long groupCount = (long) session.createQuery("select count(*) from QuestionnairesStepsDto where destinationTrueAsGroup=:destinationStep and stepOrGroup=:stepOrGroup")
+                          .setParameter("destinationStep", groupsDto.getId())
+                          .setParameter("stepOrGroup", StudyMetaDataConstants.GROUP)
+                          .setMaxResults(1)
+                          .uniqueResult();
+                  if (groupCount > 0) {
+                    ArrayList<QuestionnairesStepsDto> stepsDtoListAsc = (ArrayList<QuestionnairesStepsDto>) stepsDtoList.clone();
+                    Collections.sort(stepsDtoListAsc, new Comparator<QuestionnairesStepsDto>(){
+                      public int compare(QuestionnairesStepsDto o1, QuestionnairesStepsDto o2){
+                        return o1.getSequenceNo() - o2.getSequenceNo();
                       }
+                    });
+                    int i = 0;
+                    for (QuestionnairesStepsDto stepsDto : stepsDtoListAsc) {
+                      if (stepsDto.getStepId().equals(instructionStepDetails.getStepId())) {
+                        instructionBean.setDefaultVisibility(false);
+                        instructionBean.setHidden(true);
+                        instructionBean.setGroupId(groupsDto.getGroupId());
+                        if (stepsDtoListAsc.size() > (i + 1)) {
+                          preLoadLogicBean.setDestinationStepKey(stepsDtoListAsc.get(i + 1).getStepShortTitle());
+                        }
+                      }
+                      i++;
                     }
-                    i++;
                   }
                 }
               }
@@ -2485,141 +2492,6 @@ public class ActivityMetaDataDao {
             questionBean.setHealthDataKey(questionsDto.getHealthkitDatatype().trim());
           }
 
-          // setting survey data
-          questionBean.setDefaultVisibility(questionStepDetails.getDefaultVisibility());
-
-          long count = 0;
-          count = (long) session.createQuery("select count(*) from QuestionnairesDto where id in (" +
-                  " select questionnairesId from QuestionnairesStepsDto where destinationTrueAsGroup=:targetId) and live=:live")
-                  .setParameter("targetId", questionStepDetails.getStepId())
-                  .setParameter("live", 1)
-                  .uniqueResult();
-          questionBean.setHidden(count > 0);
-          List<PreLoadLogicDto> preLoadLogicDtoList = null;
-          PreLoadLogicBean preLoadLogicBean = new PreLoadLogicBean();
-          Integer trueDest = questionStepDetails.getDestinationTrueAsGroup();
-          if (trueDest != null) {
-            if (trueDest == 0) {
-              preLoadLogicBean.setDestinationStepKey("0");
-              if (questionStepDetails.getDifferentSurveyPreLoad() != null && questionStepDetails.getDifferentSurveyPreLoad()) {
-                QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class, questionStepDetails.getPreLoadSurveyId());
-                if (questionnairesDto != null) {
-                  preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
-                  preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
-                }
-              }
-            } else {
-              if (StudyMetaDataConstants.GROUP.equals(questionStepDetails.getStepOrGroup())) {
-                GroupsDto groupsDto = session.get(GroupsDto.class, trueDest);
-                if (groupsDto != null) {
-                  List<String> questionIds = session.createQuery("select questionnaireStepId from GroupMappingDto where grpId=:groupId")
-                          .setParameter("groupId", trueDest)
-                          .list();
-                  if (questionIds != null && !questionIds.isEmpty()) {
-                    List<QuestionnairesStepsDto> stepsDtoList = session.createQuery(
-                                    "from QuestionnairesStepsDto where stepId in (:stepIdList) order by sequenceNo")
-                            .setParameterList("stepIdList", questionIds).list();
-                    if (stepsDtoList != null && !stepsDtoList.isEmpty()) {
-                      QuestionnairesStepsDto stepsDto = stepsDtoList.get(0);
-                      preLoadLogicBean.setDestinationStepKey(stepsDto.getStepShortTitle());
-                      if (questionStepDetails.getDifferentSurveyPreLoad() != null && questionStepDetails.getDifferentSurveyPreLoad()) {
-                        QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
-                                stepsDto.getQuestionnairesId());
-                        if (questionnairesDto != null) {
-                          preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
-                          preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
-                        }
-                      }
-                    }
-                  }
-                }
-              } else {
-                QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class, trueDest);
-                if (questionnairesStepsDto != null) {
-                  preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
-                  // if different survey question then do below logic
-                  if (questionStepDetails.getDifferentSurveyPreLoad() != null && questionStepDetails.getDifferentSurveyPreLoad()) {
-                    QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
-                            questionnairesStepsDto.getQuestionnairesId());
-                    if (questionnairesDto != null) {
-                      preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
-                      preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
-                    }
-                  }
-                }
-              }
-            }
-          } else {
-            if (groupsDtoList != null && !groupsDtoList.isEmpty()) {
-              for (GroupsDto groupsDto : groupsDtoList) {
-                List<Integer> stepIdList = session.createQuery("select questionnaireStepId from GroupMappingDto where grpId=:grpId")
-                        .setParameter("grpId", groupsDto.getId()).list();
-                if (stepIdList != null && !stepIdList.isEmpty()) {
-                  ArrayList<QuestionnairesStepsDto> stepsDtoList = (ArrayList<QuestionnairesStepsDto>) session.createQuery("from QuestionnairesStepsDto  where stepId in :stepIds order by sequenceNo desc")
-                          .setParameterList("stepIds", stepIdList).list();
-                  if (stepsDtoList != null && !stepsDtoList.isEmpty()) {
-                    ArrayList<QuestionnairesStepsDto> stepsDtoListAsc = (ArrayList<QuestionnairesStepsDto>) stepsDtoList.clone();
-                    Collections.sort(stepsDtoListAsc, new Comparator<QuestionnairesStepsDto>(){
-                      public int compare(QuestionnairesStepsDto o1, QuestionnairesStepsDto o2){
-                        return o1.getSequenceNo() - o2.getSequenceNo();
-                      }
-                    });
-                    int i = 0;
-                    for (QuestionnairesStepsDto stepsDto : stepsDtoListAsc) {
-                      if (stepsDto.getStepId().equals(questionStepDetails.getStepId())) {
-                        questionBean.setDefaultVisibility(false);
-                        questionBean.setHidden(true);
-                        questionBean.setGroupId(groupsDto.getGroupId());
-                        if (stepsDtoListAsc.size() > (i + 1)) {
-                          preLoadLogicBean.setDestinationStepKey(stepsDtoListAsc.get(i + 1).getStepShortTitle());
-                        }
-                      }
-                      i++;
-                    }
-                    // last question of a particular group
-                    QuestionnairesStepsDto stepsDto = stepsDtoList.get(0);
-                    if (questionStepDetails.getStepId().equals(stepsDto.getStepId())) {
-                      Integer groupDest = groupsDto.getDestinationTrueAsGroup();
-                      questionBean.setSkippable(false);
-                      if (groupDest != null) {
-                        if (groupDest == 0) {
-                          preLoadLogicBean.setDestinationStepKey("0");
-                          preLoadLogicDtoList = logicDtoMap.get(groupsDto.getId() + "_group");
-                        } else if (StudyMetaDataConstants.GROUP.equals(groupsDto.getStepOrGroup())) {
-                          List<Integer> steps = session.createQuery("select questionnaireStepId from GroupMappingDto where grpId=:grpId")
-                                  .setParameter("grpId", groupsDto.getDestinationTrueAsGroup()).list();
-                          if (steps != null && !steps.isEmpty()) {
-                            List<QuestionnairesStepsDto> stepsList = session.createQuery("from QuestionnairesStepsDto  where stepId in :stepIds order by sequenceNo")
-                                    .setParameterList("stepIds", steps)
-                                    .list();
-                            if (stepsList != null && !stepsList.isEmpty()) {
-                              // first question of a group
-                              QuestionnairesStepsDto firstStep = stepsList.get(0);
-                              preLoadLogicBean.setDestinationStepKey(firstStep.getStepShortTitle());
-                              questionBean.setDefaultVisibility(false);
-                              preLoadLogicDtoList = logicDtoMap.get(groupsDto.getId() + "_group");
-                            }
-                          }
-                        } else {
-                          QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class, groupDest);
-                          if (questionnairesStepsDto != null) {
-                            preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
-                            questionBean.setDefaultVisibility(false);
-                            preLoadLogicDtoList = logicDtoMap.get(groupsDto.getId() + "_group");
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-
-          if (questionBean.getDefaultVisibility() != null && !questionBean.getDefaultVisibility()) {
-            questionBean.setSkippable(false);
-          }
-
           String sourceKey = (String) session.createQuery("select stepShortTitle from QuestionnairesStepsDto where destinationTrueAsGroup=:destId")
                   .setParameter("destId", questionStepDetails.getStepId())
                   .setMaxResults(1)
@@ -2695,6 +2567,149 @@ public class ActivityMetaDataDao {
           }
 
           questionBean.setSourceQuestionKey(sourceKey);
+
+          // setting survey data
+          questionBean.setDefaultVisibility(questionStepDetails.getDefaultVisibility());
+
+          long count = 0;
+          count = (long) session.createQuery("select count(*) from QuestionnairesDto where id in (" +
+                  " select questionnairesId from QuestionnairesStepsDto where destinationTrueAsGroup=:targetId) and live=:live")
+                  .setParameter("targetId", questionStepDetails.getStepId())
+                  .setParameter("live", 1)
+                  .uniqueResult();
+          questionBean.setHidden(count > 0);
+          List<PreLoadLogicDto> preLoadLogicDtoList = null;
+          PreLoadLogicBean preLoadLogicBean = new PreLoadLogicBean();
+          Integer trueDest = questionStepDetails.getDestinationTrueAsGroup();
+          if (trueDest != null) {
+            if (trueDest == 0) {
+              preLoadLogicBean.setDestinationStepKey("0");
+              if (questionStepDetails.getDifferentSurveyPreLoad() != null && questionStepDetails.getDifferentSurveyPreLoad()) {
+                QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class, questionStepDetails.getPreLoadSurveyId());
+                if (questionnairesDto != null) {
+                  preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
+                  preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+                }
+              }
+            } else {
+              if (StudyMetaDataConstants.GROUP.equals(questionStepDetails.getStepOrGroup())) {
+                GroupsDto groupsDto = session.get(GroupsDto.class, trueDest);
+                if (groupsDto != null) {
+                  List<String> questionIds = session.createQuery("select questionnaireStepId from GroupMappingDto where grpId=:groupId")
+                          .setParameter("groupId", trueDest)
+                          .list();
+                  if (questionIds != null && !questionIds.isEmpty()) {
+                    List<QuestionnairesStepsDto> stepsDtoList = session.createQuery(
+                                    "from QuestionnairesStepsDto where stepId in (:stepIdList) order by sequenceNo")
+                            .setParameterList("stepIdList", questionIds).list();
+                    if (stepsDtoList != null && !stepsDtoList.isEmpty()) {
+                      QuestionnairesStepsDto stepsDto = stepsDtoList.get(0);
+                      preLoadLogicBean.setDestinationStepKey(stepsDto.getStepShortTitle());
+                      if (questionStepDetails.getDifferentSurveyPreLoad() != null && questionStepDetails.getDifferentSurveyPreLoad()) {
+                        QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
+                                stepsDto.getQuestionnairesId());
+                        if (questionnairesDto != null) {
+                          preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
+                          preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+                        }
+                      }
+                    }
+                  }
+                }
+              } else {
+                QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class, trueDest);
+                if (questionnairesStepsDto != null) {
+                  preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
+                  // if different survey question then do below logic
+                  if (questionStepDetails.getDifferentSurveyPreLoad() != null && questionStepDetails.getDifferentSurveyPreLoad()) {
+                    QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class,
+                            questionnairesStepsDto.getQuestionnairesId());
+                    if (questionnairesDto != null) {
+                      preLoadLogicBean.setActivityId(questionnairesDto.getShortTitle());
+                      preLoadLogicBean.setActivityVersion(String.valueOf(questionnairesDto.getVersion()));
+                    }
+                  }
+                }
+              }
+            }
+          } else {
+            if (groupsDtoList != null && !groupsDtoList.isEmpty()) {
+              for (GroupsDto groupsDto : groupsDtoList) {
+                List<Integer> stepIdList = session.createQuery("select questionnaireStepId from GroupMappingDto where grpId=:grpId")
+                        .setParameter("grpId", groupsDto.getId()).list();
+                if (stepIdList != null && !stepIdList.isEmpty()) {
+                  ArrayList<QuestionnairesStepsDto> stepsDtoList = (ArrayList<QuestionnairesStepsDto>) session.createQuery("from QuestionnairesStepsDto  where stepId in :stepIds order by sequenceNo desc")
+                          .setParameterList("stepIds", stepIdList).list();
+                  if (stepsDtoList != null && !stepsDtoList.isEmpty()) {
+                    long groupCount = (long) session.createQuery("select count(*) from QuestionnairesStepsDto where destinationTrueAsGroup=:destinationStep and stepOrGroup=:stepOrGroup")
+                            .setParameter("destinationStep", groupsDto.getId())
+                            .setParameter("stepOrGroup", StudyMetaDataConstants.GROUP)
+                            .setMaxResults(1)
+                            .uniqueResult();
+                    if (groupCount > 0) {
+                      ArrayList<QuestionnairesStepsDto> stepsDtoListAsc = (ArrayList<QuestionnairesStepsDto>) stepsDtoList.clone();
+                      Collections.sort(stepsDtoListAsc, new Comparator<QuestionnairesStepsDto>(){
+                        public int compare(QuestionnairesStepsDto o1, QuestionnairesStepsDto o2){
+                          return o1.getSequenceNo() - o2.getSequenceNo();
+                        }
+                      });
+                      int i = 0;
+                      for (QuestionnairesStepsDto stepsDto : stepsDtoListAsc) {
+                        if (stepsDto.getStepId().equals(questionStepDetails.getStepId())) {
+                          questionBean.setDefaultVisibility(false);
+                          questionBean.setHidden(true);
+                          questionBean.setGroupId(groupsDto.getGroupId());
+                          if (stepsDtoListAsc.size() > (i + 1)) {
+                            preLoadLogicBean.setDestinationStepKey(stepsDtoListAsc.get(i + 1).getStepShortTitle());
+                          }
+                        }
+                        i++;
+                      }
+                    }
+
+                    // last question of a particular group
+                    QuestionnairesStepsDto stepsDto = stepsDtoList.get(0);
+                    if (questionStepDetails.getStepId().equals(stepsDto.getStepId())) {
+                      Integer groupDest = groupsDto.getDestinationTrueAsGroup();
+                      questionBean.setSkippable(false);
+                      if (groupDest != null) {
+                        if (groupDest == 0) {
+                          preLoadLogicBean.setDestinationStepKey("0");
+                          preLoadLogicDtoList = logicDtoMap.get(groupsDto.getId() + "_group");
+                        } else if (StudyMetaDataConstants.GROUP.equals(groupsDto.getStepOrGroup())) {
+                          List<Integer> steps = session.createQuery("select questionnaireStepId from GroupMappingDto where grpId=:grpId")
+                                  .setParameter("grpId", groupsDto.getDestinationTrueAsGroup()).list();
+                          if (steps != null && !steps.isEmpty()) {
+                            List<QuestionnairesStepsDto> stepsList = session.createQuery("from QuestionnairesStepsDto  where stepId in :stepIds order by sequenceNo")
+                                    .setParameterList("stepIds", steps)
+                                    .list();
+                            if (stepsList != null && !stepsList.isEmpty()) {
+                              // first question of a group
+                              QuestionnairesStepsDto firstStep = stepsList.get(0);
+                              preLoadLogicBean.setDestinationStepKey(firstStep.getStepShortTitle());
+                              questionBean.setDefaultVisibility(false);
+                              preLoadLogicDtoList = logicDtoMap.get(groupsDto.getId() + "_group");
+                            }
+                          }
+                        } else {
+                          QuestionnairesStepsDto questionnairesStepsDto = session.get(QuestionnairesStepsDto.class, groupDest);
+                          if (questionnairesStepsDto != null) {
+                            preLoadLogicBean.setDestinationStepKey(questionnairesStepsDto.getStepShortTitle());
+                            questionBean.setDefaultVisibility(false);
+                            preLoadLogicDtoList = logicDtoMap.get(groupsDto.getId() + "_group");
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          if (questionBean.getDefaultVisibility() != null && !questionBean.getDefaultVisibility()) {
+            questionBean.setSkippable(false);
+          }
 
           if (preLoadLogicDtoList == null) {
             preLoadLogicDtoList = logicDtoMap.get(questionStepDetails.getStepId() + "_step");
@@ -3110,27 +3125,33 @@ public class ActivityMetaDataDao {
                       ArrayList<QuestionnairesStepsDto> stepsDtoList = (ArrayList<QuestionnairesStepsDto>) session.createQuery("from QuestionnairesStepsDto  where stepId in :stepIds order by sequenceNo desc")
                               .setParameterList("stepIds", stepIdList).list();
                       if (stepsDtoList != null && !stepsDtoList.isEmpty()) {
-                        ArrayList<QuestionnairesStepsDto> stepsDtoListAsc = (ArrayList<QuestionnairesStepsDto>) stepsDtoList.clone();
-                        Collections.sort(stepsDtoListAsc, new Comparator<QuestionnairesStepsDto>(){
-                          public int compare(QuestionnairesStepsDto o1, QuestionnairesStepsDto o2){
-                            return o1.getSequenceNo() - o2.getSequenceNo();
-                          }
-                        });
-                        int j = 0;
-                        for (QuestionnairesStepsDto stepsDto : stepsDtoListAsc) {
-                          if (stepsDto.getStepId().equals(formStepDetails.getStepId())) {
-                            formBean.setHidden(true);
-                            formBean.setGroupId(groupsDto.getGroupId());
-                            stepsBean.setDefaultVisibility(false);
-                            stepsBean.setHidden(true);
-                            stepsBean.setGroupId(groupsDto.getGroupId());
-                            if (stepsDtoListAsc.size() > (j + 1)) {
-                              preLoadLogicBean.setDestinationStepKey(stepsDtoListAsc.get(j + 1).getStepShortTitle());
+                        long groupCount = (long) session.createQuery("select count(*) from QuestionnairesStepsDto where destinationTrueAsGroup=:destinationStep and stepOrGroup=:stepOrGroup")
+                                .setParameter("destinationStep", groupsDto.getId())
+                                .setParameter("stepOrGroup", StudyMetaDataConstants.GROUP)
+                                .setMaxResults(1)
+                                .uniqueResult();
+                        if (groupCount > 0) {
+                          ArrayList<QuestionnairesStepsDto> stepsDtoListAsc = (ArrayList<QuestionnairesStepsDto>) stepsDtoList.clone();
+                          Collections.sort(stepsDtoListAsc, new Comparator<QuestionnairesStepsDto>(){
+                            public int compare(QuestionnairesStepsDto o1, QuestionnairesStepsDto o2){
+                              return o1.getSequenceNo() - o2.getSequenceNo();
                             }
+                          });
+                          int j = 0;
+                          for (QuestionnairesStepsDto stepsDto : stepsDtoListAsc) {
+                            if (stepsDto.getStepId().equals(formStepDetails.getStepId())) {
+                              formBean.setHidden(true);
+                              formBean.setGroupId(groupsDto.getGroupId());
+                              stepsBean.setDefaultVisibility(false);
+                              stepsBean.setHidden(true);
+                              stepsBean.setGroupId(groupsDto.getGroupId());
+                              if (stepsDtoListAsc.size() > (j + 1)) {
+                                preLoadLogicBean.setDestinationStepKey(stepsDtoListAsc.get(j + 1).getStepShortTitle());
+                              }
+                            }
+                            j++;
                           }
-                          j++;
                         }
-
                         // last question of a particular group
                         QuestionnairesStepsDto stepsDto = stepsDtoList.get(0);
                         stepsBean.setSkippable(false);
