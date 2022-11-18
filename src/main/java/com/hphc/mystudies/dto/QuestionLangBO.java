@@ -87,6 +87,9 @@ public class QuestionLangBO implements Serializable {
   @Column(name = "other_description")
   private String otherDescription;
 
+  @Column(name = "piping_snippet")
+  private String pipingSnippet;
+
   public String getOtherText() {
     return otherText;
   }
@@ -293,5 +296,13 @@ public class QuestionLangBO implements Serializable {
 
   public void setFormId(Integer formId) {
     this.formId = formId;
+  }
+
+  public String getPipingSnippet() {
+    return pipingSnippet;
+  }
+
+  public void setPipingSnippet(String pipingSnippet) {
+    this.pipingSnippet = pipingSnippet;
   }
 }
