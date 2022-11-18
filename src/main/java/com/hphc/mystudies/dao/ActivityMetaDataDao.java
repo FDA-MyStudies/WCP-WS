@@ -1977,10 +1977,14 @@ public class ActivityMetaDataDao {
                   ? ""
                   : instructionStepDetails.getStepShortTitle());
 
+          PipingBean pipingBean = new PipingBean();
           if (StringUtils.isNotBlank(language) && !MultiLanguageConstants.ENGLISH.equals(language)) {
             InstructionsLangBO instructionsLangBO =
                 this.getInstructionLangBo(instructionsDto.getId(), language);
             if (instructionsLangBO != null) {
+              pipingBean.setPipingSnippet(StringUtils.isEmpty(instructionsLangBO.getPipingSnippet())
+                      ? ""
+                      : instructionsLangBO.getPipingSnippet());
               instructionBean.setTitle(
                   StringUtils.isEmpty(instructionsLangBO.getInstructionTitle())
                       ? ""
@@ -1990,8 +1994,10 @@ public class ActivityMetaDataDao {
                   StringUtils.isEmpty(instructionsLangBO.getInstructionText())
                       ? ""
                       : instructionsLangBO.getInstructionText());
-            }
-            else {
+            } else {
+              pipingBean.setPipingSnippet(StringUtils.isEmpty(instructionStepDetails.getPipingSnippet())
+                      ? ""
+                      : instructionStepDetails.getPipingSnippet());
               instructionBean.setTitle(
                   StringUtils.isEmpty(instructionsDto.getInstructionTitle())
                       ? ""
@@ -2003,6 +2009,9 @@ public class ActivityMetaDataDao {
                       : instructionsDto.getInstructionText());
             }
           } else {
+            pipingBean.setPipingSnippet(StringUtils.isEmpty(instructionStepDetails.getPipingSnippet())
+                    ? ""
+                    : instructionStepDetails.getPipingSnippet());
             instructionBean.setTitle(
                 StringUtils.isEmpty(instructionsDto.getInstructionTitle())
                     ? ""
@@ -2013,13 +2022,28 @@ public class ActivityMetaDataDao {
                     ? ""
                     : instructionsDto.getInstructionText());
           }
+          Integer pipingSrc = instructionStepDetails.getPipingSourceQuestionKey();
+          if (pipingSrc != null) {
+            QuestionnairesStepsDto stepsDto = session.get(QuestionnairesStepsDto.class, pipingSrc);
+            if (stepsDto != null) {
+              pipingBean.setSourceQuestionKey(stepsDto.getStepShortTitle());
+              if (instructionStepDetails.getDifferentSurvey() != null && instructionStepDetails.getDifferentSurvey()) {
+                QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class, stepsDto.getQuestionnairesId());
+                if (questionnairesDto != null) {
+                  pipingBean.setActivityId(questionnairesDto.getShortTitle());
+                  pipingBean.setActivityVersion(questionnairesDto.getVersion() != null ? String.valueOf(questionnairesDto.getVersion()) : "");
+                }
+              }
+            }
+          }
+          instructionBean.setPipingLogic(pipingBean);
+          instructionBean.setPiping(instructionStepDetails.getIsPiping());
+
           instructionBean.setSkippable(
-              (StringUtils.isEmpty(instructionStepDetails.getSkiappable())
-                      || instructionStepDetails
+                  !StringUtils.isEmpty(instructionStepDetails.getSkiappable())
+                          && !instructionStepDetails
                           .getSkiappable()
-                          .equalsIgnoreCase(StudyMetaDataConstants.NO))
-                  ? false
-                  : true);
+                          .equalsIgnoreCase(StudyMetaDataConstants.NO));
           instructionBean.setGroupName("");
           instructionBean.setRepeatable(false);
           instructionBean.setRepeatableText(
@@ -2152,25 +2176,6 @@ public class ActivityMetaDataDao {
           instructionBean.setPreLoadLogic(preLoadLogicBean);
           instructionBean.setSourceQuestionKey(sourceKey);
 
-          PipingBean pipingBean = new PipingBean();
-          pipingBean.setPipingSnippet(instructionStepDetails.getPipingSnippet());
-          Integer pipingSrc = instructionStepDetails.getPipingSourceQuestionKey();
-          if (pipingSrc != null) {
-            QuestionnairesStepsDto stepsDto = session.get(QuestionnairesStepsDto.class, pipingSrc);
-            if (stepsDto != null) {
-              pipingBean.setSourceQuestionKey(stepsDto.getStepShortTitle());
-              if (instructionStepDetails.getDifferentSurvey() != null && instructionStepDetails.getDifferentSurvey()) {
-                QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class, stepsDto.getQuestionnairesId());
-                if (questionnairesDto != null) {
-                  pipingBean.setActivityId(questionnairesDto.getShortTitle());
-                  pipingBean.setActivityVersion(questionnairesDto.getVersion() != null ? String.valueOf(questionnairesDto.getVersion()) : "");
-                }
-              }
-            }
-          }
-          instructionBean.setPipingLogic(pipingBean);
-          instructionBean.setPiping(instructionStepDetails.getIsPiping());
-
           stepsSequenceTreeMap.put(
                   sequenceNoMap.get(
                           (instructionsDto.getId()
@@ -2243,10 +2248,15 @@ public class ActivityMetaDataDao {
             questionBean.setResultType("");
           }
 
+          PipingBean pipingBean = new PipingBean();
           if (StringUtils.isNotBlank(language)
               && !MultiLanguageConstants.ENGLISH.equals(language)) {
             QuestionLangBO questionLangBO = this.getQuestionLangBo(questionsDto.getId(), language);
             if (questionLangBO != null) {
+              pipingBean.setPipingSnippet(
+                      StringUtils.isEmpty(questionLangBO.getPipingSnippet())
+                      ? ""
+                      : questionLangBO.getPipingSnippet());
               questionBean.setText(
                   StringUtils.isEmpty(questionLangBO.getDescription())
                       ? ""
@@ -2256,6 +2266,10 @@ public class ActivityMetaDataDao {
                       ? ""
                       : questionLangBO.getQuestion());
             } else {
+              pipingBean.setPipingSnippet(
+                      StringUtils.isEmpty(questionStepDetails.getPipingSnippet())
+                              ? ""
+                              : questionStepDetails.getPipingSnippet());
               questionBean.setText(
                   StringUtils.isEmpty(questionsDto.getDescription())
                       ? ""
@@ -2264,6 +2278,11 @@ public class ActivityMetaDataDao {
                   StringUtils.isEmpty(questionsDto.getQuestion()) ? "" : questionsDto.getQuestion());
             }
           } else {
+            pipingBean.setPipingSnippet(
+                    StringUtils.isEmpty(questionStepDetails.getPipingSnippet())
+                            ? ""
+                            : questionStepDetails.getPipingSnippet());
+
             questionBean.setText(
                 StringUtils.isEmpty(questionsDto.getDescription())
                     ? ""
@@ -2271,6 +2290,22 @@ public class ActivityMetaDataDao {
             questionBean.setTitle(
                 StringUtils.isEmpty(questionsDto.getQuestion()) ? "" : questionsDto.getQuestion());
           }
+          Integer pipingSrc = questionStepDetails.getPipingSourceQuestionKey();
+          if (pipingSrc != null) {
+            QuestionnairesStepsDto stepsDto = session.get(QuestionnairesStepsDto.class, pipingSrc);
+            if (stepsDto != null) {
+              pipingBean.setSourceQuestionKey(stepsDto.getStepShortTitle());
+              if (questionStepDetails.getDifferentSurvey() != null && questionStepDetails.getDifferentSurvey()) {
+                QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class, stepsDto.getQuestionnairesId());
+                if (questionnairesDto != null) {
+                  pipingBean.setActivityId(questionnairesDto.getShortTitle());
+                  pipingBean.setActivityVersion(questionnairesDto.getVersion() != null ? String.valueOf(questionnairesDto.getVersion()) : "");
+                }
+              }
+            }
+          }
+          questionBean.setPipingLogic(pipingBean);
+          questionBean.setPiping(questionStepDetails.getIsPiping());
 
           questionBean.setKey(
               StringUtils.isEmpty(questionStepDetails.getStepShortTitle())
@@ -2769,24 +2804,6 @@ public class ActivityMetaDataDao {
           preLoadLogicBean.setValue(value.toString());
           preLoadLogicBean.setOperator(operator.toString());
           questionBean.setPreLoadLogic(preLoadLogicBean);
-          PipingBean pipingBean = new PipingBean();
-          pipingBean.setPipingSnippet(questionStepDetails.getPipingSnippet());
-          Integer pipingSrc = questionStepDetails.getPipingSourceQuestionKey();
-          if (pipingSrc != null) {
-            QuestionnairesStepsDto stepsDto = session.get(QuestionnairesStepsDto.class, pipingSrc);
-            if (stepsDto != null) {
-              pipingBean.setSourceQuestionKey(stepsDto.getStepShortTitle());
-              if (questionStepDetails.getDifferentSurvey() != null && questionStepDetails.getDifferentSurvey()) {
-                QuestionnairesDto questionnairesDto = session.get(QuestionnairesDto.class, stepsDto.getQuestionnairesId());
-                if (questionnairesDto != null) {
-                  pipingBean.setActivityId(questionnairesDto.getShortTitle());
-                  pipingBean.setActivityVersion(questionnairesDto.getVersion() != null ? String.valueOf(questionnairesDto.getVersion()) : "");
-                }
-              }
-            }
-          }
-          questionBean.setPipingLogic(pipingBean);
-          questionBean.setPiping(questionStepDetails.getIsPiping());
 
           stepsSequenceTreeMap.put(
                   sequenceNoMap.get(
@@ -3073,6 +3090,11 @@ public class ActivityMetaDataDao {
             }
           }
 
+          // setting survey data
+          if (formStepDetails.getDefaultVisibility() != null && !formStepDetails.getDefaultVisibility()) {
+            formBean.setSkippable(false);
+          }
+
           formBean.setSourceQuestionKey(sourceKey);
 
           long count = 0;
@@ -3213,6 +3235,7 @@ public class ActivityMetaDataDao {
                         // last question of a particular group
                         QuestionnairesStepsDto stepsDto = stepsDtoList.get(0);
                         stepsBean.setSkippable(false);
+                        formBean.setSkippable(false);
                         if (formStepDetails.getStepId().equals(stepsDto.getStepId())) {
                           Integer groupDest = groupsDto.getDestinationTrueAsGroup();
                           if (groupDest != null) {
@@ -3293,12 +3316,6 @@ public class ActivityMetaDataDao {
             formSteps.add(stepsBean);
           }
           formBean.setSteps(formSteps);
-
-          // setting survey data
-          if (formStepDetails.getDefaultVisibility() != null && !formStepDetails.getDefaultVisibility()) {
-            formBean.setSkippable(false);
-          }
-
           formBean.setPipingLogic(new PipingBean());
           formBean.setPiping(false);
 
