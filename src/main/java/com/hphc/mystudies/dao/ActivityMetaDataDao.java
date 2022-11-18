@@ -2075,7 +2075,7 @@ public class ActivityMetaDataDao {
                   groupId = destGroup.getId();
                 }
                 Integer firstStep = this.getFirstStepOfGroup(session, groupId);
-                if (firstStep.equals(instructionStepDetails.getStepId())) {
+                if (instructionStepDetails.getStepId().equals(firstStep)) {
                   if (StudyMetaDataConstants.GROUP.equals(groupsDto.getStepOrGroup())) {
                     QuestionnairesStepsDto stepsDto = this.getLastStepOfGroup(session, groupsDto);
                     sourceKey = stepsDto != null ? stepsDto.getStepShortTitle() : null;
@@ -2503,7 +2503,7 @@ public class ActivityMetaDataDao {
             if (groupsDtoList != null) {
               for (GroupsDto groupsDto : groupsDtoList) {
                 Integer firstStep = this.getFirstStepOfGroup(session, groupsDto.getId());
-                if (firstStep.equals(questionStepDetails.getStepId())) {
+                if (questionStepDetails.getStepId().equals(firstStep)) {
                   sourceKey = (String) session.createQuery("select stepShortTitle from QuestionnairesStepsDto where destinationTrueAsGroup=:grpId" +
                                   " and stepOrGroup=:group")
                           .setParameter("grpId", groupsDto.getId())
@@ -2530,7 +2530,7 @@ public class ActivityMetaDataDao {
                   groupId = destGroup.getId();
                 }
                 Integer firstStep = this.getFirstStepOfGroup(session, groupId);
-                if (firstStep.equals(questionStepDetails.getStepId())) {
+                if (questionStepDetails.getStepId().equals(firstStep)) {
                   if (StudyMetaDataConstants.GROUP.equals(groupsDto.getStepOrGroup())) {
                     QuestionnairesStepsDto stepsDto = this.getLastStepOfGroup(session, groupsDto);
                     sourceKey = stepsDto != null ? stepsDto.getStepShortTitle() : null;
@@ -3038,7 +3038,7 @@ public class ActivityMetaDataDao {
                 groupId = destGroup.getId();
               }
               Integer firstStep = this.getFirstStepOfGroup(session, groupId);
-              if (firstStep.equals(formStepDetails.getStepId())) {
+              if (formStepDetails.getStepId().equals(firstStep)) {
                 if (StudyMetaDataConstants.GROUP.equals(groupsDto.getStepOrGroup())) {
                   QuestionnairesStepsDto stepsDto = this.getLastStepOfGroup(session, groupsDto);
                   sourceKey = stepsDto != null ? stepsDto.getStepShortTitle() : null;
