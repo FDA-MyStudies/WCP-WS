@@ -855,7 +855,7 @@ public class ActivityMetaDataDao {
               }
             }
           }
-          questionaireStepsList = this.getDestinationStepType(questionaireStepsList);
+          questionaireStepsList = this.getDestinationStepType(session, questionaireStepsList);
 
           List<PreLoadLogicDto> preLoadLogicDtoList = session.createQuery(
                   "from PreLoadLogicDto where stepGroupId in (:stepId) and stepOrGroup= :step")
@@ -4807,19 +4807,30 @@ public class ActivityMetaDataDao {
    * @throws DAOException
    * @author BTC
    */
-  public List<QuestionnairesStepsDto> getDestinationStepType(
+  public List<QuestionnairesStepsDto> getDestinationStepType(Session session,
       List<QuestionnairesStepsDto> questionaireStepsList) throws DAOException {
     LOGGER.info("INFO: ActivityMetaDataDao - getDestinationStepType() :: Starts");
     List<QuestionnairesStepsDto> questionnaireStepsTypeList = new ArrayList<>();
     try {
       for (QuestionnairesStepsDto questionnaireStepsDto : questionaireStepsList) {
         for (QuestionnairesStepsDto stepsDto : questionaireStepsList) {
-          if (questionnaireStepsDto.getDestinationStep().equals(stepsDto.getStepId())) {
-            questionnaireStepsDto.setDestinationStepType(
-                StringUtils.isEmpty(stepsDto.getStepShortTitle())
-                    ? ""
-                    : stepsDto.getStepShortTitle());
-            break;
+          if (StudyMetaDataConstants.GROUP.equals(stepsDto.getStepOrGroupPostLoad())) {
+            Integer firstStepOfGroup = this.getFirstStepOfGroup(session, questionnaireStepsDto.getDestinationStep());
+            if (firstStepOfGroup != null) {
+              QuestionnairesStepsDto firstStep = session.get(QuestionnairesStepsDto.class, firstStepOfGroup);
+              if (firstStep != null) {
+                  questionnaireStepsDto.setDestinationStepType(firstStep.getStepShortTitle());
+                  break;
+              }
+            }
+          } else {
+            if (questionnaireStepsDto.getDestinationStep().equals(stepsDto.getStepId())) {
+              questionnaireStepsDto.setDestinationStepType(
+                      StringUtils.isEmpty(stepsDto.getStepShortTitle())
+                              ? ""
+                              : stepsDto.getStepShortTitle());
+              break;
+            }
           }
         }
         questionnaireStepsTypeList.add(questionnaireStepsDto);
