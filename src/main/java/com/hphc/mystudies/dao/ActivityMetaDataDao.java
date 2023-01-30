@@ -2036,7 +2036,7 @@ public class ActivityMetaDataDao {
               }
             }
           }
-          if (instructionStepDetails.getPipingSurveyId() != null) {
+          if (instructionStepDetails.getPipingSourceQuestionKey() != null) {
             instructionBean.setPipingLogic(pipingBean);
             instructionBean.setPiping(instructionStepDetails.getIsPiping());
           } else {
@@ -2317,7 +2317,7 @@ public class ActivityMetaDataDao {
               }
             }
           }
-          if (questionStepDetails.getPipingSurveyId() != null) {
+          if (questionStepDetails.getPipingSourceQuestionKey() != null) {
             questionBean.setPipingLogic(pipingBean);
             questionBean.setPiping(questionStepDetails.getIsPiping());
           } else {
