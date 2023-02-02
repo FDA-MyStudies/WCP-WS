@@ -2036,8 +2036,12 @@ public class ActivityMetaDataDao {
               }
             }
           }
-          instructionBean.setPipingLogic(pipingBean);
-          instructionBean.setPiping(instructionStepDetails.getIsPiping());
+          if (instructionStepDetails.getPipingSourceQuestionKey() != null) {
+            instructionBean.setPipingLogic(pipingBean);
+            instructionBean.setPiping(instructionStepDetails.getIsPiping());
+          } else {
+            instructionBean.setPipingLogic(new PipingBean());
+          }
 
           instructionBean.setSkippable(
                   !StringUtils.isEmpty(instructionStepDetails.getSkiappable())
@@ -2313,8 +2317,12 @@ public class ActivityMetaDataDao {
               }
             }
           }
-          questionBean.setPipingLogic(pipingBean);
-          questionBean.setPiping(questionStepDetails.getIsPiping());
+          if (questionStepDetails.getPipingSourceQuestionKey() != null) {
+            questionBean.setPipingLogic(pipingBean);
+            questionBean.setPiping(questionStepDetails.getIsPiping());
+          } else {
+            questionBean.setPipingLogic(new PipingBean());
+          }
 
           questionBean.setKey(
               StringUtils.isEmpty(questionStepDetails.getStepShortTitle())
