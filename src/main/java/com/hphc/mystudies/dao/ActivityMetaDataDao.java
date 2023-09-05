@@ -4872,8 +4872,26 @@ public class ActivityMetaDataDao {
       List<QuestionnairesStepsDto> questionaireStepsList)
       throws DAOException {
     LOGGER.info("INFO: ActivityMetaDataDao - getDestinationStepTypeForResponseSubType() :: Starts");
+    Session session = null;
+    GroupsDto groupDto = null;
+    List<GroupMappingDto> groupsMappingBo = null;
     try {
+      session = sessionFactory.openSession();
       for (QuestionnairesStepsDto stepsDto : questionaireStepsList) {
+        if (stepsDto.getStepOrGroupPostLoad() != null) {
+          groupDto = (GroupsDto) session.createQuery(" from GroupsDto where id=:id")
+              .setParameter("id", stepsDto.getDestinationStep()).setMaxResults(1).uniqueResult();
+          if (groupDto == null) {
+            groupDto = (GroupsDto) session.createQuery(" from GroupsDto where id=:id")
+                .setParameter("id", destinationDto.getDestinationStepId()).setMaxResults(1)
+                .uniqueResult();
+          }
+          if (groupDto != null) {
+            groupsMappingBo = session.createQuery(" from GroupMappingDto where grpId=:grpId")
+                .setParameter("grpId", groupDto.getId()).list();
+          }
+
+        }
         if (destinationDto.getDestinationStepId().equals(stepsDto.getStepId())) {
           destinationBean.setDestination(
               StringUtils.isEmpty(stepsDto.getStepShortTitle())
@@ -4881,9 +4899,29 @@ public class ActivityMetaDataDao {
                   : stepsDto.getStepShortTitle());
           break;
         }
+        if (groupDto != null) {
+          if (groupDto.getId().equals(destinationDto.getDestinationStepId())) {
+            for (GroupMappingDto groupsMap : groupsMappingBo) {
+              for (QuestionnairesStepsDto stepsDtos : questionaireStepsList) {
+                if (groupsMap.getQuestionnaireStepId().equals(stepsDtos.getStepId())
+                    && (destinationBean.getDestination() == null
+                        || destinationBean.getDestination().equals(""))) {
+                  destinationBean
+                      .setDestination(StringUtils.isEmpty(stepsDtos.getStepShortTitle()) ? ""
+                          : stepsDtos.getStepShortTitle());
+                  // break;
+                }
+              }
+            }
+          }
+        }
       }
     } catch (Exception e) {
       LOGGER.error("ActivityMetaDataDao - getDestinationStepTypeForResponseSubType() :: ERROR", e);
+    } finally {
+      if (session != null) {
+        session.close();
+      }
     }
     LOGGER.info("INFO: ActivityMetaDataDao - getDestinationStepTypeForResponseSubType() :: Ends");
     return destinationBean;
