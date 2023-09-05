@@ -4878,22 +4878,19 @@ public class ActivityMetaDataDao {
     try {
       session = sessionFactory.openSession();
       for (QuestionnairesStepsDto stepsDto : questionaireStepsList) {
-        if(stepsDto.getStepOrGroupPostLoad() != null) {
-        groupDto = (GroupsDto)session.createQuery(" from GroupsDto where id=:id")
-            .setParameter("id", stepsDto.getDestinationStep())
-            .setMaxResults(1)
-            .uniqueResult();
-        if(groupDto == null) {
-          groupDto = (GroupsDto)session.createQuery(" from GroupsDto where id=:id")
-              .setParameter("id", destinationDto.getDestinationStepId())
-              .setMaxResults(1)
-              .uniqueResult();
-        }
-        if (groupDto != null) {
-          groupsMappingBo = session.createQuery(" from GroupMappingDto where grpId=:grpId")
-              .setParameter("grpId", groupDto.getId()).list();
-        }
-        
+        if (stepsDto.getStepOrGroupPostLoad() != null) {
+          groupDto = (GroupsDto) session.createQuery(" from GroupsDto where id=:id")
+              .setParameter("id", stepsDto.getDestinationStep()).setMaxResults(1).uniqueResult();
+          if (groupDto == null) {
+            groupDto = (GroupsDto) session.createQuery(" from GroupsDto where id=:id")
+                .setParameter("id", destinationDto.getDestinationStepId()).setMaxResults(1)
+                .uniqueResult();
+          }
+          if (groupDto != null) {
+            groupsMappingBo = session.createQuery(" from GroupMappingDto where grpId=:grpId")
+                .setParameter("grpId", groupDto.getId()).list();
+          }
+
         }
         if (destinationDto.getDestinationStepId().equals(stepsDto.getStepId())) {
           destinationBean.setDestination(
@@ -4902,19 +4899,18 @@ public class ActivityMetaDataDao {
                   : stepsDto.getStepShortTitle());
           break;
         }
-        if(groupDto != null) {
+        if (groupDto != null) {
           if (groupDto.getId().equals(destinationDto.getDestinationStepId())) {
-            for(GroupMappingDto groupsMap: groupsMappingBo) {
-            for(QuestionnairesStepsDto stepsDtos : questionaireStepsList) { 
-                if(groupsMap.getQuestionnaireStepId().equals(stepsDtos.getStepId()) && 
-                    (destinationBean.getDestination() == null || destinationBean.getDestination().equals(""))) {
-                  destinationBean.setDestination(
-                      StringUtils.isEmpty(stepsDtos.getStepShortTitle())
-                          ? ""
+            for (GroupMappingDto groupsMap : groupsMappingBo) {
+              for (QuestionnairesStepsDto stepsDtos : questionaireStepsList) {
+                if (groupsMap.getQuestionnaireStepId().equals(stepsDtos.getStepId())
+                    && (destinationBean.getDestination() == null
+                        || destinationBean.getDestination().equals(""))) {
+                  destinationBean
+                      .setDestination(StringUtils.isEmpty(stepsDtos.getStepShortTitle()) ? ""
                           : stepsDtos.getStepShortTitle());
-//                  break;
+                  // break;
                 }
-                
               }
             }
           }
