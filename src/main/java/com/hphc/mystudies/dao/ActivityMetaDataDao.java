@@ -4878,15 +4878,21 @@ public class ActivityMetaDataDao {
     try {
       session = sessionFactory.openSession();
       for (QuestionnairesStepsDto stepsDto : questionaireStepsList) {
-        if(stepsDto.getStepOrGroupPostLoad() != null && stepsDto.getStepOrGroupPostLoad().equalsIgnoreCase("group")) {
+        if(stepsDto.getStepOrGroupPostLoad() != null) {
         groupDto = (GroupsDto)session.createQuery(" from GroupsDto where id=:id")
             .setParameter("id", stepsDto.getDestinationStep())
             .setMaxResults(1)
             .uniqueResult();
-        
-        groupsMappingBo = session.createQuery(" from GroupMappingDto where grpId=:grpId")
-            .setParameter("grpId", groupDto.getId())
-            .list();
+        if(groupDto == null) {
+          groupDto = (GroupsDto)session.createQuery(" from GroupsDto where id=:id")
+              .setParameter("id", destinationDto.getDestinationStepId())
+              .setMaxResults(1)
+              .uniqueResult();
+        }
+        if (groupDto != null) {
+          groupsMappingBo = session.createQuery(" from GroupMappingDto where grpId=:grpId")
+              .setParameter("grpId", groupDto.getId()).list();
+        }
         
         }
         if (destinationDto.getDestinationStepId().equals(stepsDto.getStepId())) {
